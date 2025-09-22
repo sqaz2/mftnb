@@ -5,7 +5,8 @@ const ESTIMATE_SHEET_NAME = 'Leads';
 const QUICK_SHEET_NAME = 'Quick Messages';
 const OFFICE_EMAIL = 'info@mftnb.ca';
 const CUSTOMER_SUBJECT = 'We received your message – Moving Forward to New Beginnings';
-const TURNSTILE_SECRET = '0x4AAAAAAB2kYsZYtF1wgSrfu8k7BEI0OMw';
+const TURNSTILE_SECRET_PROPERTY = 'TURNSTILE_SECRET'; // Configure via script properties.
+let cachedTurnstileSecret;
 
 function doOptions() {
   return respond({ ok: true }, 200);
@@ -163,13 +164,28 @@ function handleQuickMessageSubmission(body) {
   }
 }
 
+function getTurnstileSecret_() {
+  if (typeof cachedTurnstileSecret === 'undefined') {
+    const secret = PropertiesService.getScriptProperties().getProperty(TURNSTILE_SECRET_PROPERTY);
+    cachedTurnstileSecret = secret || null;
+    if (!cachedTurnstileSecret) {
+      console.error('Turnstile secret not configured. Set the TURNSTILE_SECRET script property.');
+    }
+  }
+  return cachedTurnstileSecret;
+}
+
 function verifyTurnstile(token, e, expectedAction) {
   if (!token) {
     return { success: false };
   }
+  const secret = getTurnstileSecret_();
+  if (!secret) {
+    return { success: false };
+  }
   const remoteip = e && e.context ? e.context.clientIp : '';
   const payload = {
-    secret: TURNSTILE_SECRET,
+    secret,
     response: token
   };
   if (remoteip) {
