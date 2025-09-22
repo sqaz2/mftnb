@@ -753,7 +753,7 @@ function buildEstimatePayload() {
     moveDate: estimateState.moveDate || '',
     timeWindow: estimateState.moveTime || '',
     homeType: estimateState.homeType || '',
-    homeSize: estimateState.homeType || '',
+    homeSize: estimateState.bedrooms || '',
     bedrooms: estimateState.bedrooms || '',
     access: estimateState.accessDetails || '',
     inventory: estimateState.specialItems || '',
