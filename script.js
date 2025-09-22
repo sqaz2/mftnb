@@ -1,7 +1,10 @@
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2kTp_RynPKZptrLJrsv_DvS_-el2bzBz8Jc_QaEej2nHop5iABnMcuEa5pff2No9W8g/exec';
-const TURNSTILE_SITE_KEY = '0x4AAAAAAB2gwLXxC5IfxB3W';
+const TURNSTILE_SITE_KEY = '0x4AAAAAAB2kYqJ0EOGNbli7';
 const STORAGE_KEY = 'mftnb-estimate-v3';
 const TURNSTILE_INIT_RETRY_DELAY = 250;
+const TURNSTILE_MAX_INIT_ATTEMPTS = 20;
+const TURNSTILE_LOADING_MESSAGE = 'Loading human verification…';
+const TURNSTILE_FAILED_MESSAGE = 'Cloudflare Turnstile could not load. Refresh the page or allow the widget to run, then try again.';
 
 const questions = [
   {
@@ -217,6 +220,7 @@ let estimateWidgetId = null;
 let quickTurnstileToken = null;
 let quickWidgetId = null;
 let turnstileRetryHandle = null;
+let turnstileInitAttempts = 0;
 let isSubmittingEstimate = false;
 
 const chatLog = document.getElementById('chatLog');
@@ -284,6 +288,14 @@ function initializeTurnstileWidgets() {
   const turnstileApi = window.turnstile;
 
   if (!turnstileApi || typeof turnstileApi.render !== 'function') {
+    if (turnstileInitAttempts === 0) {
+      showTurnstileLoadingNotice();
+    }
+    if (turnstileInitAttempts >= TURNSTILE_MAX_INIT_ATTEMPTS) {
+      showTurnstileFailureNotice();
+      return;
+    }
+    turnstileInitAttempts += 1;
     if (!turnstileRetryHandle) {
       turnstileRetryHandle = window.setTimeout(() => {
         turnstileRetryHandle = null;
@@ -292,6 +304,9 @@ function initializeTurnstileWidgets() {
     }
     return;
   }
+
+  turnstileInitAttempts = 0;
+  clearTurnstileNotices();
 
   if (turnstileRetryHandle) {
     window.clearTimeout(turnstileRetryHandle);
@@ -335,6 +350,58 @@ function initializeTurnstileWidgets() {
       }
     });
   }
+}
+
+function showTurnstileLoadingNotice() {
+  if (
+    estimateStatus &&
+    !estimateStatus.textContent &&
+    !estimateStatus.classList.contains('error') &&
+    !estimateStatus.classList.contains('success')
+  ) {
+    setStatus(estimateStatus, null, TURNSTILE_LOADING_MESSAGE);
+  }
+  if (
+    quickStatus &&
+    !quickStatus.textContent &&
+    !quickStatus.classList.contains('error') &&
+    !quickStatus.classList.contains('success')
+  ) {
+    setStatus(quickStatus, null, TURNSTILE_LOADING_MESSAGE);
+  }
+}
+
+function showTurnstileFailureNotice() {
+  if (estimateStatus && !estimateStatus.classList.contains('success')) {
+    setStatus(estimateStatus, 'error', TURNSTILE_FAILED_MESSAGE);
+  }
+  if (quickStatus && !quickStatus.classList.contains('success')) {
+    setStatus(quickStatus, 'error', TURNSTILE_FAILED_MESSAGE);
+  }
+}
+
+function clearTurnstileNotices() {
+  if (estimateStatus && (estimateStatus.textContent === TURNSTILE_LOADING_MESSAGE || estimateStatus.textContent === TURNSTILE_FAILED_MESSAGE)) {
+    clearStatus(estimateStatus);
+  }
+  if (quickStatus && (quickStatus.textContent === TURNSTILE_LOADING_MESSAGE || quickStatus.textContent === TURNSTILE_FAILED_MESSAGE)) {
+    clearStatus(quickStatus);
+  }
+}
+
+if (typeof window !== 'undefined') {
+  const previousOnloadTurnstile = window.onloadTurnstileCallback;
+  window.onloadTurnstileCallback = () => {
+    if (typeof previousOnloadTurnstile === 'function') {
+      try {
+        previousOnloadTurnstile();
+      } catch (err) {
+        // ignore callback errors and continue with initialization
+      }
+    }
+    turnstileInitAttempts = 0;
+    initializeTurnstileWidgets();
+  };
 }
 
 if (document.readyState === 'loading') {
