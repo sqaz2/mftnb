@@ -1,5 +1,5 @@
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2kTp_RynPKZptrLJrsv_DvS_-el2bzBz8Jc_QaEej2nHop5iABnMcuEa5pff2No9W8g/exec';
-const TURNSTILE_SITE_KEY = '0x4AAAAAAB2gwLXxC5IfxB3W';
+const TURNSTILE_SITE_KEY = '0x4AAAAAAB2kYqJ0EOGNbli7';
 const STORAGE_KEY = 'mftnb-estimate-v3';
 const TURNSTILE_INIT_RETRY_DELAY = 250;
 

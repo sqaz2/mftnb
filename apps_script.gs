@@ -5,7 +5,7 @@ const ESTIMATE_SHEET_NAME = 'Leads';
 const QUICK_SHEET_NAME = 'Quick Messages';
 const OFFICE_EMAIL = 'info@mftnb.ca';
 const CUSTOMER_SUBJECT = 'We received your message – Moving Forward to New Beginnings';
-const TURNSTILE_SECRET = '0x4AAAAAAB2gwLfn0PN8o6zw4eLmMN0r49g';
+const TURNSTILE_SECRET = '0x4AAAAAAB2kYsZYtF1wgSrfu8k7BEI0OMw';
 
 function doOptions() {
   return respond({ ok: true }, 200);
