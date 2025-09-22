@@ -268,8 +268,10 @@
   <script>
   const BACKEND = {
     mode: 'apps_script',
-    appsScriptUrl: 'https://script.google.com/macros/s/AKfycbz2kTp_RynPKZptrLJrsv_DvS_-el2bzBz8Jc_QaEej2nHop5iABnMcuEa5pff2No9W8g/exec',
+appsScriptUrl: 'https://script.google.com/macros/s/AKfycbz2kTp_RynPKZptrLJrsv_DvS_-el2bzBz8Jc_QaEej2nHop5iABnMcuEa5pff2No9W8g/exec'
   };
+</script>
+
   const KEY = 'mftnb_estimate_v1'; let state = JSON.parse(localStorage.getItem(KEY) || '{}');
   const steps = [
     { id:'intro',   prompt: "Welcome! Let's get a quick estimate started. What's your full name?", field:'name', type:'text', required:true, group:1 },
