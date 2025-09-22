@@ -16,12 +16,25 @@
   <script defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
   <style>
     :root{ --brand-50:#f0e0e1; --brand-100:#e0c0c2; --brand-600:#b8373e; --brand-700:#992e34; --brand-800:#6b2024; --brand-900:#54191d; }
-    .caret { width: 1px; background: currentColor; display:inline-block; animation: blink 1s step-end infinite; }
+    /* smooth scrolling + anchor offset so the step bar is fully visible */
+  html { scroll-behavior: smooth; }                 /* NEW */
+  section[id] { scroll-margin-top: 96px; }          /* NEW */
+
+  .caret { width: 1px; background: currentColor; display:inline-block; animation: blink 1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  ... .caret { width: 1px; background: currentColor; display:inline-block; animation: blink 1s step-end infinite; }
     @keyframes blink { 50% { opacity: 0; } }
     input[type=number]::-webkit-inner-spin-button,
     input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     .fade-in { animation: fade 300ms ease-out; }
     @keyframes fade { from { opacity: 0; transform: translateY(4px) } to { opacity: 1; transform:none } }
+    // After DOM loads, if the URL already has #estimator, nudge scroll to show the full bar
+  window.addEventListener('load', () => {
+    if (location.hash === '#estimator') {
+      const el = document.querySelector('#estimator');
+      if (el) setTimeout(() => el.scrollIntoView({behavior:'instant', block:'start'}), 50);
+    }
+  });
   </style>
   <script type="application/ld+json" id="org-jsonld">
   {
