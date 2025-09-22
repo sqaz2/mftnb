@@ -788,7 +788,7 @@ function submitEstimate() {
 
   fetch(APPS_SCRIPT_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
     body: JSON.stringify(payload)
   })
     .then(async response => {
@@ -888,7 +888,7 @@ function submitQuickMessage(event) {
 
   fetch(APPS_SCRIPT_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
     body: JSON.stringify(payload)
   })
     .then(async response => {
