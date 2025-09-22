@@ -281,7 +281,9 @@ if (quickForm) {
 }
 
 function initializeTurnstileWidgets() {
-  if (!window.turnstile) {
+  const turnstileApi = window.turnstile;
+
+  if (!turnstileApi || typeof turnstileApi.render !== 'function') {
     if (!turnstileRetryHandle) {
       turnstileRetryHandle = window.setTimeout(() => {
         turnstileRetryHandle = null;
@@ -296,45 +298,43 @@ function initializeTurnstileWidgets() {
     turnstileRetryHandle = null;
   }
 
-  window.turnstile.ready(() => {
-    if (document.getElementById('estimateTurnstile') && !estimateWidgetId) {
-      estimateWidgetId = window.turnstile.render('#estimateTurnstile', {
-        sitekey: TURNSTILE_SITE_KEY,
-        action: 'estimate',
-        theme: 'light',
-        callback: token => {
-          estimateTurnstileToken = token;
-          updateSubmitAvailability();
-        },
-        'error-callback': () => {
-          estimateTurnstileToken = null;
-          updateSubmitAvailability();
-        },
-        'expired-callback': () => {
-          estimateTurnstileToken = null;
-          updateSubmitAvailability();
-        }
-      });
-    }
+  if (document.getElementById('estimateTurnstile') && !estimateWidgetId) {
+    estimateWidgetId = turnstileApi.render('#estimateTurnstile', {
+      sitekey: TURNSTILE_SITE_KEY,
+      action: 'estimate',
+      theme: 'light',
+      callback: token => {
+        estimateTurnstileToken = token;
+        updateSubmitAvailability();
+      },
+      'error-callback': () => {
+        estimateTurnstileToken = null;
+        updateSubmitAvailability();
+      },
+      'expired-callback': () => {
+        estimateTurnstileToken = null;
+        updateSubmitAvailability();
+      }
+    });
+  }
 
-    if (document.getElementById('quickTurnstile') && !quickWidgetId) {
-      quickWidgetId = window.turnstile.render('#quickTurnstile', {
-        sitekey: TURNSTILE_SITE_KEY,
-        action: 'quick_message',
-        theme: 'light',
-        size: 'compact',
-        callback: token => {
-          quickTurnstileToken = token;
-        },
-        'error-callback': () => {
-          quickTurnstileToken = null;
-        },
-        'expired-callback': () => {
-          quickTurnstileToken = null;
-        }
-      });
-    }
-  });
+  if (document.getElementById('quickTurnstile') && !quickWidgetId) {
+    quickWidgetId = turnstileApi.render('#quickTurnstile', {
+      sitekey: TURNSTILE_SITE_KEY,
+      action: 'quick_message',
+      theme: 'light',
+      size: 'compact',
+      callback: token => {
+        quickTurnstileToken = token;
+      },
+      'error-callback': () => {
+        quickTurnstileToken = null;
+      },
+      'expired-callback': () => {
+        quickTurnstileToken = null;
+      }
+    });
+  }
 }
 
 if (document.readyState === 'loading') {
