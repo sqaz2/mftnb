@@ -518,6 +518,29 @@ textarea.input-field {
   padding-bottom: 0;
 }
 
+.turnstile-slot {
+  min-height: 78px;
+  display: grid;
+  place-items: center;
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.turnstile-slot iframe {
+  margin: 0 auto;
+}
+
+.summary-panel .turnstile-slot {
+  margin: 1.25rem 0 0;
+}
+
+.turnstile-placeholder {
+  display: block;
+  width: 100%;
+}
+
 .summary-item-label {
   font-weight: 600;
   margin-bottom: 0.25rem;
@@ -753,6 +776,10 @@ textarea.input-field {
 .quick-form button {
   justify-self: start;
   padding-inline: 1.6rem;
+}
+
+.quick-form .turnstile-slot {
+  margin-top: 0.25rem;
 }
 
 #quickStatus {

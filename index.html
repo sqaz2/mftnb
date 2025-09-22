@@ -169,7 +169,9 @@
               <input type="checkbox" id="consent" />
               <label for="consent">I agree to the <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and allow the team to contact me about my move.</label>
             </div>
-            <div id="estimateTurnstile" class="turnstile-slot" aria-live="polite"></div>
+            <div id="estimateTurnstile" class="turnstile-slot" aria-live="polite">
+              <span class="turnstile-placeholder">Loading human verification… If the check does not appear, please refresh the page or disable content blockers.</span>
+            </div>
             <div class="action-buttons">
               <button type="button" id="sendEstimate" class="btn-submit" disabled>Send to MFTNB</button>
               <button type="button" id="restartEstimate" class="btn-link">Start over</button>
@@ -297,7 +299,9 @@
               <label for="quickMessage">How can we help? *</label>
               <textarea id="quickMessage" name="message" required></textarea>
             </div>
-            <div id="quickTurnstile" class="turnstile-slot" aria-live="polite"></div>
+            <div id="quickTurnstile" class="turnstile-slot" aria-live="polite">
+              <span class="turnstile-placeholder">Loading human verification… If the check does not appear, please refresh or disable content blockers.</span>
+            </div>
             <button type="submit" class="btn-primary">Send message</button>
             <p id="quickStatus" role="status"></p>
           </form>

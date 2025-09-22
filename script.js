@@ -281,24 +281,25 @@ if (quickForm) {
 }
 
 function initializeTurnstileWidgets() {
-  if (!window.turnstile) {
-    if (!turnstileRetryHandle) {
-      turnstileRetryHandle = window.setTimeout(() => {
-        turnstileRetryHandle = null;
-        initializeTurnstileWidgets();
-      }, TURNSTILE_INIT_RETRY_DELAY);
-    }
+  const estimateContainer = document.getElementById('estimateTurnstile');
+  const quickContainer = document.getElementById('quickTurnstile');
+
+  if (!estimateContainer && !quickContainer) {
     return;
   }
 
-  if (turnstileRetryHandle) {
-    window.clearTimeout(turnstileRetryHandle);
-    turnstileRetryHandle = null;
+  const turnstileApi = window.turnstile;
+
+  if (!turnstileApi || typeof turnstileApi.render !== 'function') {
+    scheduleTurnstileRetry();
+    return;
   }
 
-  window.turnstile.ready(() => {
-    if (document.getElementById('estimateTurnstile') && !estimateWidgetId) {
-      estimateWidgetId = window.turnstile.render('#estimateTurnstile', {
+  const renderWidgets = () => {
+    clearTurnstileRetry();
+
+    if (estimateContainer && !estimateWidgetId) {
+      const id = turnstileApi.render('#estimateTurnstile', {
         sitekey: TURNSTILE_SITE_KEY,
         action: 'estimate',
         theme: 'light',
@@ -315,10 +316,15 @@ function initializeTurnstileWidgets() {
           updateSubmitAvailability();
         }
       });
+
+      if (id) {
+        estimateWidgetId = id;
+        removeTurnstilePlaceholder(estimateContainer);
+      }
     }
 
-    if (document.getElementById('quickTurnstile') && !quickWidgetId) {
-      quickWidgetId = window.turnstile.render('#quickTurnstile', {
+    if (quickContainer && !quickWidgetId) {
+      const id = turnstileApi.render('#quickTurnstile', {
         sitekey: TURNSTILE_SITE_KEY,
         action: 'quick_message',
         theme: 'light',
@@ -333,8 +339,43 @@ function initializeTurnstileWidgets() {
           quickTurnstileToken = null;
         }
       });
+
+      if (id) {
+        quickWidgetId = id;
+        removeTurnstilePlaceholder(quickContainer);
+      }
     }
-  });
+  };
+
+  if (typeof turnstileApi.ready === 'function') {
+    turnstileApi.ready(renderWidgets);
+  } else {
+    renderWidgets();
+  }
+}
+
+function scheduleTurnstileRetry() {
+  if (!turnstileRetryHandle) {
+    turnstileRetryHandle = window.setTimeout(() => {
+      turnstileRetryHandle = null;
+      initializeTurnstileWidgets();
+    }, TURNSTILE_INIT_RETRY_DELAY);
+  }
+}
+
+function clearTurnstileRetry() {
+  if (turnstileRetryHandle) {
+    window.clearTimeout(turnstileRetryHandle);
+    turnstileRetryHandle = null;
+  }
+}
+
+function removeTurnstilePlaceholder(container) {
+  if (!container) return;
+  const placeholder = container.querySelector('.turnstile-placeholder');
+  if (placeholder) {
+    placeholder.remove();
+  }
 }
 
 if (document.readyState === 'loading') {
@@ -342,6 +383,8 @@ if (document.readyState === 'loading') {
 } else {
   initializeTurnstileWidgets();
 }
+
+window.addEventListener('load', initializeTurnstileWidgets, { once: true });
 
 function renderEstimator() {
   activeQuestionIndex = findNextQuestionIndex();
@@ -709,7 +752,12 @@ function submitEstimate() {
   if (!sendEstimateBtn || sendEstimateBtn.disabled || isSubmittingEstimate) return;
   const payload = buildEstimatePayload();
   if (!payload.turnstileToken) {
-    setStatus(estimateStatus, 'error', 'Please complete the Turnstile check.');
+    initializeTurnstileWidgets();
+    setStatus(
+      estimateStatus,
+      'error',
+      'Please complete the Cloudflare Turnstile check above. If it does not appear, reload the page or disable content blockers.'
+    );
     return;
   }
 
@@ -802,7 +850,12 @@ function submitQuickMessage(event) {
     return;
   }
   if (!quickTurnstileToken) {
-    setStatus(quickStatus, 'error', 'Please complete the Turnstile check.');
+    initializeTurnstileWidgets();
+    setStatus(
+      quickStatus,
+      'error',
+      'Please complete the Cloudflare Turnstile check. If it does not appear, reload the page or disable content blockers.'
+    );
     return;
   }
 
