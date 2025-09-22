@@ -16,9 +16,16 @@ Option B: Cloudflare Pages
 Set up the backend (Google Apps Script → Google Sheets)
 1) Drive → New → Google Sheet (e.g., “MFTNB Leads”), keep Sheet1.
 2) Extensions → Apps Script → paste contents of apps_script.gs.
-3) File → Save. Deploy → New deployment → Web app → Execute as: Me; Access: Anyone (or Anyone with the link). Copy URL.
-4) Open index.html and set BACKEND.appsScriptUrl to that URL. Save and redeploy your site.
-5) Submit a test; a new row appears in the sheet and an email is sent (optional).
+3) File → Save. In Project Settings → Script properties, add `TURNSTILE_SECRET` with your Cloudflare secret key. (Never store the secret in source control.)
+4) Deploy → New deployment → Web app → Execute as: Me; Access: Anyone (or Anyone with the link). Copy URL.
+5) Open script.js and set `APPS_SCRIPT_URL` to that URL. Save and redeploy your site.
+6) Submit a test; a new row appears in the sheet and an email is sent (optional).
+
+Cloudflare Turnstile configuration
+- Frontend: The estimator and quick message forms render Turnstile explicitly. Update `TURNSTILE_SITE_KEY` in `script.js` with your site key from the Cloudflare dashboard.
+- The widget is loaded via `https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit`. If the script is blocked, the UI now surfaces a clear message so visitors know to refresh or allow the challenge.
+- Backend: Store the secret key in the `TURNSTILE_SECRET` script property. (Keep `TURNSTILE_SECRET_FALLBACK` blank unless you are doing a one-off local test.) The Apps Script verifies every submission with Cloudflare before anything is written to Sheets.
+- Rotate keys in the Cloudflare dashboard as needed; only update Script Properties and the site key constant—no repository changes are required when swapping secrets.
 
 Privacy & anti-spam
 - No secrets or keys in the frontend. Apps Script runs server-side in your Google account.
