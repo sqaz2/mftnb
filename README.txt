@@ -16,10 +16,12 @@ Option B: Cloudflare Pages
 Set up the backend (Google Apps Script → Google Sheets)
 1) Drive → New → Google Sheet (e.g., “MFTNB Leads”), keep Sheet1.
 2) Extensions → Apps Script → paste contents of apps_script.gs.
-3) File → Save. Deploy → New deployment → Web app → Execute as: Me; Access: Anyone (or Anyone with the link). Copy URL.
-4) Open index.html and set BACKEND.appsScriptUrl to that URL. Save and redeploy your site.
-5) Submit a test; a new row appears in the sheet and an email is sent (optional).
+3) File → Save. File → Project properties → Script properties → add `TURNSTILE_SECRET` with your Cloudflare Turnstile secret key.
+4) Deploy → New deployment → Web app → Execute as: Me; Access: Anyone (or Anyone with the link). Copy the new `/exec` URL.
+5) Open index.html and set BACKEND.appsScriptUrl to that URL. Save and redeploy your site.
+6) Submit a test; a new row appears in the sheet and an email is sent (optional).
 
 Privacy & anti-spam
 - No secrets or keys in the frontend. Apps Script runs server-side in your Google account.
+- Store the Cloudflare Turnstile secret in Apps Script → Project properties → Script properties as `TURNSTILE_SECRET`.
 - Hidden honeypot field to block bots. Add reCAPTCHA v3 later if needed.
