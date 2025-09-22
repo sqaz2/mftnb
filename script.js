@@ -1,6 +1,7 @@
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2kTp_RynPKZptrLJrsv_DvS_-el2bzBz8Jc_QaEej2nHop5iABnMcuEa5pff2No9W8g/exec';
 const TURNSTILE_SITE_KEY = '0x4AAAAAAB2gwLXxC5IfxB3W';
 const STORAGE_KEY = 'mftnb-estimate-v3';
+const TURNSTILE_INIT_RETRY_DELAY = 250;
 
 const questions = [
   {
@@ -215,6 +216,7 @@ let estimateTurnstileToken = null;
 let estimateWidgetId = null;
 let quickTurnstileToken = null;
 let quickWidgetId = null;
+let turnstileRetryHandle = null;
 let isSubmittingEstimate = false;
 
 const chatLog = document.getElementById('chatLog');
@@ -279,7 +281,21 @@ if (quickForm) {
 }
 
 function initializeTurnstileWidgets() {
-  if (!window.turnstile) return;
+  if (!window.turnstile) {
+    if (!turnstileRetryHandle) {
+      turnstileRetryHandle = window.setTimeout(() => {
+        turnstileRetryHandle = null;
+        initializeTurnstileWidgets();
+      }, TURNSTILE_INIT_RETRY_DELAY);
+    }
+    return;
+  }
+
+  if (turnstileRetryHandle) {
+    window.clearTimeout(turnstileRetryHandle);
+    turnstileRetryHandle = null;
+  }
+
   window.turnstile.ready(() => {
     if (document.getElementById('estimateTurnstile') && !estimateWidgetId) {
       estimateWidgetId = window.turnstile.render('#estimateTurnstile', {
@@ -320,8 +336,6 @@ function initializeTurnstileWidgets() {
     }
   });
 }
-
-window.onTurnstileLibraryLoad = initializeTurnstileWidgets;
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initializeTurnstileWidgets, { once: true });
