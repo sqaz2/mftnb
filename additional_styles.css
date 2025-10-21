@@ -1,269 +1,121 @@
-/* Additional styles for donation, junk removal, and corporate giving forms */
+/* Supportive styles for the new standalone service pages. */
 
 .donation-form {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: #fff;
+  padding: clamp(1.5rem, 2.5vw, 2.5rem);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(20, 38, 69, 0.08);
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #142645;
+  color: var(--brand-navy);
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid rgba(20, 38, 69, 0.15);
+  border-radius: 10px;
   font-family: inherit;
   font-size: 1rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: #fff;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.form-group input:required:invalid {
-  border-color: #ddd;
-}
-
-.form-group input:required:valid {
-  border-color: #2e7d32;
+  border-color: rgba(63, 126, 219, 0.8);
+  box-shadow: 0 0 0 3px rgba(63, 126, 219, 0.15);
 }
 
 .form-group small {
   display: block;
-  margin-top: 0.25rem;
-  color: #666;
-  font-size: 0.875rem;
+  margin-top: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
   line-height: 1.4;
 }
 
 .form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
-  margin-bottom: 1.5rem;
 }
 
-/* Turnstile container */
 .turnstile-slot {
   margin: 1.5rem 0;
-  min-height: 65px;
+  min-height: 70px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Status messages */
-#donationStatus,
-#junkStatus,
-#corporateStatus,
-#inquiryStatus {
-  padding: 0.75rem;
-  border-radius: 4px;
-  font-weight: 500;
-  text-align: center;
-}
-
-/* Grid cards for features */
-.grid-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin: 2rem 0;
-}
-
-.card h4 {
-  margin-top: 0;
-  color: #142645;
-}
-
-/* Highlight boxes */
-.highlight {
-  background: #f0f7ff;
-  border-left: 4px solid #2563eb;
-  padding: 2rem;
-  border-radius: 8px;
-  margin: 2rem 0;
-}
-
-.highlight h3 {
-  margin-top: 0;
-  color: #142645;
-}
-
-/* Button styles */
-.btn-secondary {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  background: white;
-  color: #2563eb;
-  border: 2px solid #2563eb;
-  border-radius: 4px;
-  text-decoration: none;
+.form-status {
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-md);
   font-weight: 600;
-  transition: all 0.2s;
   text-align: center;
+  margin-top: 1rem;
 }
 
-.btn-secondary:hover {
-  background: #2563eb;
-  color: white;
+.form-status:empty {
+  padding: 0;
+  margin-top: 0;
+  border: 0;
 }
 
-/* Furniture inventory specific styles */
-.inventory-item {
-  position: relative;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 1.5rem;
-  transition: box-shadow 0.2s;
-}
-
-.inventory-item:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.status-badge {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  padding: 0.25rem 0.75rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.status-available {
+.form-status[data-status="success"] {
   background: #e8f5e9;
   color: #2e7d32;
+  border-left: 4px solid #2e7d32;
 }
 
-.status-pending {
-  background: #fff3e0;
-  color: #e65100;
+.form-status[data-status="error"] {
+  background: #ffebee;
+  color: #d32f2f;
+  border-left: 4px solid #d32f2f;
 }
 
-.status-sold {
-  background: #f5f5f5;
-  color: #666;
+.conditional-group {
+  transition: opacity 0.25s ease, max-height 0.25s ease;
 }
 
-/* Corporate giving conditional fields */
-#furnitureGroup,
-#valueGroup,
-#sponsorshipGroup {
-  transition: opacity 0.3s, max-height 0.3s;
+.donation-form button[type="submit"] {
+  width: 100%;
+  margin-top: 0.5rem;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-  
-  .grid-cards {
-    grid-template-columns: 1fr;
-  }
-  
-  .donation-form {
-    padding: 1.5rem;
-  }
-  
-  .hero h1 {
-    font-size: 2rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .donation-form {
-    padding: 1rem;
-  }
-  
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    font-size: 16px; /* Prevents zoom on iOS */
-  }
-}
-
-/* Print styles for inventory */
-@media print {
-  .site-header,
-  .site-footer,
-  #inquiryForm,
-  .btn-secondary {
-    display: none;
-  }
-  
-  .inventory-item {
-    page-break-inside: avoid;
-    border: 1px solid #000;
-    margin-bottom: 1rem;
-  }
-}
-
-/* Loading states */
-.btn-primary:disabled,
-.btn-secondary:disabled {
+.donation-form button[type="submit"][disabled] {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* Accessibility improvements */
-.form-group input:focus-visible,
-.form-group select:focus-visible,
-.form-group textarea:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
+@media (max-width: 768px) {
+  .donation-form {
+    padding: clamp(1.25rem, 5vw, 2rem);
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 7vw, 2.5rem);
+  }
 }
 
-/* Smooth scrolling for anchor links */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Error states */
-.form-group input:invalid:not(:placeholder-shown) {
-  border-color: #d32f2f;
-}
-
-.form-group input:invalid:not(:placeholder-shown) + small {
-  color: #d32f2f;
-}
-
-/* Success states */
-.success-message {
-  background: #e8f5e9;
-  color: #2e7d32;
-  padding: 1rem;
-  border-radius: 4px;
-  margin: 1rem 0;
-  border-left: 4px solid #2e7d32;
-}
-
-.error-message {
-  background: #ffebee;
-  color: #d32f2f;
-  padding: 1rem;
-  border-radius: 4px;
-  margin: 1rem 0;
-  border-left: 4px solid #d32f2f;
+@media (max-width: 480px) {
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 16px;
+  }
 }
