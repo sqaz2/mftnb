@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Junk Removal Services | Moving Forward to New Beginnings</title>
+  <meta name="description" content="Responsible junk removal services in Red Deer and Central Alberta. We handle unwanted items, cleanouts, and responsible disposal." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="inner">
+      <a href="index.html" class="brand" aria-label="Moving Forward to New Beginnings home">
+        <img src="logo.png" alt="Moving Forward to New Beginnings logo" />
+        <span>Moving Forward to New Beginnings</span>
+      </a>
+      <nav class="primary-nav" aria-label="Primary">
+        <a href="index.html#services">Services</a>
+        <a href="index.html#community">Community</a>
+        <a href="donate.html">Donate</a>
+        <a href="junk-removal.html">Junk Removal</a>
+        <a href="index.html#contact">Contact</a>
+      </nav>
+      <div class="header-cta">
+        <a href="tel:+15877310695">Call (587) 731-0695</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1>Junk Removal & Cleanout Services</h1>
+        <p>From estate cleanouts to post-renovation debris, we handle unwanted items responsibly. We donate what we can and dispose of the rest properly—so you don't have to worry about a thing.</p>
+      </div>
+    </section>
+
+    <section class="container" style="padding: 3rem 0;">
+      <div class="grid-cards" style="margin-bottom: 3rem;">
+        <article class="card">
+          <h3>What We Remove</h3>
+          <ul style="text-align: left; margin-left: 1.5rem;">
+            <li>Old furniture & appliances</li>
+            <li>Renovation debris</li>
+            <li>Estate cleanouts</li>
+            <li>Garage & basement items</li>
+            <li>Yard waste & construction materials</li>
+            <li>E-waste (electronics)</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Our Process</h3>
+          <ul style="text-align: left; margin-left: 1.5rem;">
+            <li>Free quote after reviewing your needs</li>
+            <li>Scheduled pickup at your convenience</li>
+            <li>We handle all loading & hauling</li>
+            <li>Donate usable items when possible</li>
+            <li>Responsible disposal & recycling</li>
+            <li>Leave your space clean</li>
+          </ul>
+        </article>
+      </div>
+
+      <div style="max-width: 800px; margin: 0 auto;">
+        <h2>Request Junk Removal</h2>
+        <p style="margin-bottom: 2rem;">Tell us what you need removed and we'll contact you with a quote within 1 business day.</p>
+        
+        <form id="junkForm" class="donation-form" novalidate>
+          <div class="form-group">
+            <label for="name">Your Name *</label>
+            <input type="text" id="name" name="name" required autocomplete="name" />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" autocomplete="email" />
+            <small>We'll send your quote to this email</small>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number *</label>
+            <input type="tel" id="phone" name="phone" required autocomplete="tel" inputmode="tel" />
+          </div>
+
+          <div class="form-group">
+            <label for="address">Service Address *</label>
+            <input type="text" id="address" name="address" required autocomplete="street-address" />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="serviceDate">Preferred Service Date</label>
+              <input type="date" id="serviceDate" name="serviceDate" />
+            </div>
+
+            <div class="form-group">
+              <label for="timeWindow">Preferred Time</label>
+              <select id="timeWindow" name="timeWindow">
+                <option value="">Flexible</option>
+                <option value="Morning (8am-12pm)">Morning (8am-12pm)</option>
+                <option value="Afternoon (12pm-5pm)">Afternoon (12pm-5pm)</option>
+                <option value="Evening (5pm-8pm)">Evening (5pm-8pm)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="junkDescription">What needs to be removed? *</label>
+            <textarea id="junkDescription" name="junkDescription" rows="4" required placeholder="Describe the items: furniture, appliances, debris, etc."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="estimatedVolume">Estimated Volume *</label>
+            <select id="estimatedVolume" name="estimatedVolume" required>
+              <option value="">Select volume</option>
+              <option value="Small load (fits in pickup truck)">Small load (fits in pickup truck)</option>
+              <option value="Medium load (1/4 to 1/2 truck)">Medium load (1/4 to 1/2 truck)</option>
+              <option value="Large load (full truck)">Large load (full truck)</option>
+              <option value="Extra large (multiple truck loads)">Extra large (multiple truck loads)</option>
+              <option value="Unsure - need assessment">Unsure - need assessment</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="access">Access Details</label>
+            <textarea id="access" name="access" rows="2" placeholder="Example: Basement items, need to go through garage, alley access"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="notes">Additional Notes</label>
+            <textarea id="notes" name="notes" rows="3" placeholder="Any hazardous materials? Heavy items? Special considerations?"></textarea>
+          </div>
+
+          <div id="junkTurnstile" class="turnstile-slot" aria-live="polite"></div>
+
+          <button type="submit" class="btn-primary" style="width: 100%;">Request Quote</button>
+          <p id="junkStatus" role="status" style="margin-top: 1rem;"></p>
+        </form>
+      </div>
+    </section>
+
+    <section class="container highlight" style="margin: 3rem auto;">
+      <h3>Responsible Disposal</h3>
+      <p>We believe in doing the right thing—not just the easy thing. Before anything goes to the landfill, we assess whether it can be donated, recycled, or repurposed. Usable furniture goes to families in need. Electronics are recycled properly. Hazardous materials are disposed of according to local regulations. You get a clean space, and the environment benefits too.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <h4>Moving Forward to New Beginnings</h4>
+        <p>Serving Red Deer and Central Alberta with compassionate moving services.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul class="footer-nav">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="donate.html">Donate Furniture</a></li>
+          <li><a href="junk-removal.html">Junk Removal</a></li>
+          <li><a href="corporate-giving.html">Corporate Giving</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul class="footer-contact">
+          <li><a href="tel:+15877310695">(587) 731-0695</a></li>
+          <li><a href="mailto:info@mftnb.ca">info@mftnb.ca</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE'; // Replace with your deployed script URL
+    const TURNSTILE_SITE_KEY = 'YOUR_TURNSTILE_SITE_KEY'; // Replace with your Cloudflare Turnstile site key
+
+    let turnstileWidgetId = null;
+
+    // Initialize Turnstile
+    function initTurnstile() {
+      if (typeof turnstile !== 'undefined') {
+        const container = document.getElementById('junkTurnstile');
+        if (container && !turnstileWidgetId) {
+          turnstileWidgetId = turnstile.render('#junkTurnstile', {
+            sitekey: TURNSTILE_SITE_KEY,
+            theme: 'light',
+            action: 'junk_removal'
+          });
+        }
+      }
+    }
+
+    // Wait for Turnstile to load
+    if (typeof turnstile !== 'undefined') {
+      initTurnstile();
+    } else {
+      window.addEventListener('load', () => {
+        setTimeout(initTurnstile, 500);
+      });
+    }
+
+    // Form submission
+    document.getElementById('junkForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const statusEl = document.getElementById('junkStatus');
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      
+      // Get form data
+      const formData = new FormData(e.target);
+      const data = {
+        formType: 'junk-removal',
+        name: formData.get('name'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        address: formData.get('address'),
+        serviceDate: formData.get('serviceDate'),
+        timeWindow: formData.get('timeWindow'),
+        junkDescription: formData.get('junkDescription'),
+        estimatedVolume: formData.get('estimatedVolume'),
+        access: formData.get('access'),
+        notes: formData.get('notes'),
+        source: 'junk-removal-page'
+      };
+
+      // Get Turnstile token
+      if (turnstileWidgetId !== null && typeof turnstile !== 'undefined') {
+        data.turnstileToken = turnstile.getResponse(turnstileWidgetId);
+      }
+
+      if (!data.turnstileToken) {
+        statusEl.textContent = 'Please complete the verification check.';
+        statusEl.style.color = '#d32f2f';
+        return;
+      }
+
+      // Disable button
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+      statusEl.textContent = '';
+
+      try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.ok) {
+          statusEl.textContent = '✓ Thank you! We\'ll contact you with a quote within 1 business day.';
+          statusEl.style.color = '#2e7d32';
+          e.target.reset();
+          if (turnstileWidgetId !== null && typeof turnstile !== 'undefined') {
+            turnstile.reset(turnstileWidgetId);
+          }
+        } else {
+          throw new Error(result.error || 'Submission failed');
+        }
+      } catch (error) {
+        console.error('Submission error:', error);
+        statusEl.textContent = 'Something went wrong. Please call us at (587) 731-0695.';
+        statusEl.style.color = '#d32f2f';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Request Quote';
+      }
+    });
+  </script>
+</body>
+</html>

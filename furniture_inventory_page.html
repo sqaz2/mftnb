@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Available Furniture | Moving Forward to New Beginnings</title>
+  <meta name="description" content="Quality donated furniture available for families in need or for sale. Browse our current inventory in Red Deer." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="inner">
+      <a href="index.html" class="brand" aria-label="Moving Forward to New Beginnings home">
+        <img src="logo.png" alt="Moving Forward to New Beginnings logo" />
+        <span>Moving Forward to New Beginnings</span>
+      </a>
+      <nav class="primary-nav" aria-label="Primary">
+        <a href="index.html#services">Services</a>
+        <a href="index.html#community">Community</a>
+        <a href="donate.html">Donate</a>
+        <a href="furniture-available.html">Available Furniture</a>
+        <a href="index.html#contact">Contact</a>
+      </nav>
+      <div class="header-cta">
+        <a href="tel:+15877310695">Call (587) 731-0695</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1>Available Furniture</h1>
+        <p>Quality donated furniture available for families starting over or for sale to support our rescue move program.</p>
+      </div>
+    </section>
+
+    <section class="container" style="padding: 3rem 0;">
+      <div class="highlight" style="margin-bottom: 3rem;">
+        <h3>How It Works</h3>
+        <div class="grid-cards" style="margin-top: 1.5rem;">
+          <article class="card">
+            <h4>For Families in Need</h4>
+            <p>If you're starting over after leaving domestic violence, new to Canada, or rebuilding after hardship, contact us about receiving furniture at no cost. We verify need through community partners.</p>
+          </article>
+          <article class="card">
+            <h4>For Purchase</h4>
+            <p>Items available for sale help fund our rescue move program. Prices are significantly below retail. All proceeds support families fleeing violence.</p>
+          </article>
+          <article class="card">
+            <h4>Make an Offer</h4>
+            <p>Interested in an item? Call us at <a href="tel:+15877310695">(587) 731-0695</a> or fill out the inquiry form at the bottom of this page. First come, first served.</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="section-heading">
+        <h2>Current Inventory</h2>
+        <p>Updated regularly. Call for photos and details on specific items.</p>
+      </div>
+
+      <!-- Inventory will be loaded here -->
+      <div id="inventoryContainer" style="min-height: 300px;">
+        <p style="text-align: center; padding: 3rem;">Loading inventory...</p>
+      </div>
+
+      <!-- If no items available -->
+      <div id="noInventory" style="display: none; text-align: center; padding: 3rem; background: #f5f5f5; border-radius: 8px; margin: 2rem 0;">
+        <h3>No Items Currently Available</h3>
+        <p>We're waiting for new donations or all items have been claimed. Check back soon!</p>
+        <p style="margin-top: 1rem;">
+          <a href="donate.html" class="btn-secondary">Donate Furniture</a>
+        </p>
+      </div>
+    </section>
+
+    <section class="container" style="padding: 3rem 0; max-width: 800px;">
+      <h2>Inquire About an Item</h2>
+      <p style="margin-bottom: 2rem;">Interested in a piece of furniture? Tell us which item and we'll get back to you quickly.</p>
+      
+      <form id="inquiryForm" class="donation-form" novalidate>
+        <div class="form-group">
+          <label for="itemInterest">Item of Interest *</label>
+          <input type="text" id="itemInterest" name="itemInterest" required placeholder="Example: Blue sofa, Queen bed frame" />
+        </div>
+
+        <div class="form-group">
+          <label for="inquiryType">I am interested in: *</label>
+          <select id="inquiryType" name="inquiryType" required>
+            <option value="">Select one</option>
+            <option value="purchase">Purchasing this item</option>
+            <option value="family-in-need">Receiving as a family in need</option>
+            <option value="questions">Just have questions</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="name">Your Name *</label>
+          <input type="text" id="name" name="name" required autocomplete="name" />
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number *</label>
+          <input type="tel" id="phone" name="phone" required autocomplete="tel" inputmode="tel" />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" autocomplete="email" />
+        </div>
+
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" rows="3" placeholder="Any questions or additional details?"></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%;">Send Inquiry</button>
+        <p id="inquiryStatus" role="status" style="margin-top: 1rem;"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <h4>Moving Forward to New Beginnings</h4>
+        <p>Serving Red Deer and Central Alberta with compassionate moving services.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul class="footer-nav">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="donate.html">Donate Furniture</a></li>
+          <li><a href="furniture-available.html">Available Furniture</a></li>
+          <li><a href="junk-removal.html">Junk Removal</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul class="footer-contact">
+          <li><a href="tel:+15877310695">(587) 731-0695</a></li>
+          <li><a href="mailto:info@mftnb.ca">info@mftnb.ca</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // In a real implementation, this would fetch from your Google Sheets via Apps Script
+    // For now, this is a template showing how it would work
+    
+    const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+    
+    // Sample inventory data structure (in production, fetch from Google Sheets)
+    const sampleInventory = [
+      {
+        id: 1,
+        name: 'Blue Fabric Sofa',
+        category: 'Living Room',
+        condition: 'Good',
+        description: '3-seater sofa, navy blue, minor wear on armrests',
+        price: '$150 or free for families in need',
+        location: 'Garage storage',
+        dateAdded: '2025-01-15',
+        status: 'Available'
+      },
+      {
+        id: 2,
+        name: 'Queen Bed Frame',
+        category: 'Bedroom',
+        condition: 'Excellent',
+        description: 'Solid wood frame, dark cherry finish, no mattress',
+        price: '$200 or free for families in need',
+        location: 'Sea can',
+        dateAdded: '2025-01-12',
+        status: 'Available'
+      },
+      {
+        id: 3,
+        name: 'Dining Table with 4 Chairs',
+        category: 'Dining',
+        condition: 'Good',
+        description: 'Round table, oak finish, chairs have cushioned seats',
+        price: '$175 or free for families in need',
+        location: 'Garage storage',
+        dateAdded: '2025-01-10',
+        status: 'Available'
+      }
+    ];
+
+    function loadInventory() {
+      const container = document.getElementById('inventoryContainer');
+      const noInventory = document.getElementById('noInventory');
+      
+      // In production, you would:
+      // fetch(APPS_SCRIPT_URL + '?action=getInventory')
+      //   .then(res => res.json())
+      //   .then(data => { ... })
+      
+      // For now, use sample data
+      const inventory = sampleInventory;
+      
+      if (!inventory || inventory.length === 0) {
+        container.style.display = 'none';
+        noInventory.style.display = 'block';
+        return;
+      }
+      
+      container.innerHTML = '';
+      
+      // Group by category
+      const categories = {};
+      inventory.forEach(item => {
+        if (!categories[item.category]) {
+          categories[item.category] = [];
+        }
+        categories[item.category].push(item);
+      });
+      
+      // Render each category
+      Object.keys(categories).sort().forEach(category => {
+        const section = document.createElement('div');
+        section.style.marginBottom = '2rem';
+        
+        const heading = document.createElement('h3');
+        heading.textContent = category;
+        heading.style.marginBottom = '1rem';
+        heading.style.borderBottom = '2px solid #142645';
+        heading.style.paddingBottom = '0.5rem';
+        section.appendChild(heading);
+        
+        const grid = document.createElement('div');
+        grid.className = 'grid-cards';
+        
+        categories[category].forEach(item => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          card.style.position = 'relative';
+          
+          const statusBadge = document.createElement('div');
+          statusBadge.style.position = 'absolute';
+          statusBadge.style.top = '1rem';
+          statusBadge.style.right = '1rem';
+          statusBadge.style.padding = '0.25rem 0.75rem';
+          statusBadge.style.borderRadius = '4px';
+          statusBadge.style.fontSize = '0.875rem';
+          statusBadge.style.fontWeight = '600';
+          
+          if (item.status === 'Available') {
+            statusBadge.style.background = '#e8f5e9';
+            statusBadge.style.color = '#2e7d32';
+            statusBadge.textContent = '✓ Available';
+          } else if (item.status === 'Pending') {
+            statusBadge.style.background = '#fff3e0';
+            statusBadge.style.color = '#e65100';
+            statusBadge.textContent = 'Pending';
+          } else {
+            statusBadge.style.background = '#f5f5f5';
+            statusBadge.style.color = '#666';
+            statusBadge.textContent = 'Unavailable';
+          }
+          
+          card.appendChild(statusBadge);
+          
+          const title = document.createElement('h4');
+          title.textContent = item.name;
+          title.style.marginTop = '0.5rem';
+          card.appendChild(title);
+          
+          const condition = document.createElement('p');
+          condition.innerHTML = '<strong>Condition:</strong> ' + item.condition;
+          condition.style.marginTop = '0.5rem';
+          card.appendChild(condition);
+          
+          const description = document.createElement('p');
+          description.textContent = item.description;
+          description.style.marginTop = '0.5rem';
+          card.appendChild(description);
+          
+          const price = document.createElement('p');
+          price.innerHTML = '<strong>' + item.price + '</strong>';
+          price.style.marginTop = '1rem';
+          price.style.color = '#2563eb';
+          price.style.fontSize = '1.125rem';
+          card.appendChild(price);
+          
+          const location = document.createElement('p');
+          location.innerHTML = '<small>Location: ' + item.location + '</small>';
+          location.style.marginTop = '0.5rem';
+          location.style.color = '#666';
+          card.appendChild(location);
+          
+          const inquireBtn = document.createElement('button');
+          inquireBtn.textContent = 'Inquire About This Item';
+          inquireBtn.className = 'btn-secondary';
+          inquireBtn.style.width = '100%';
+          inquireBtn.style.marginTop = '1rem';
+          inquireBtn.onclick = () => {
+            document.getElementById('itemInterest').value = item.name;
+            document.getElementById('inquiryForm').scrollIntoView({ behavior: 'smooth' });
+          };
+          card.appendChild(inquireBtn);
+          
+          grid.appendChild(card);
+        });
+        
+        section.appendChild(grid);
+        container.appendChild(section);
+      });
+    }
+
+    // Load inventory on page load
+    document.addEventListener('DOMContentLoaded', loadInventory);
+
+    // Handle inquiry form submission
+    document.getElementById('inquiryForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const statusEl = document.getElementById('inquiryStatus');
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      
+      const formData = new FormData(e.target);
+      const data = {
+        formType: 'quick-message',
+        name: formData.get('name'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        message: `Furniture Inquiry: ${formData.get('itemInterest')}\nInquiry Type: ${formData.get('inquiryType')}\n\n${formData.get('message') || ''}`,
+        source: 'furniture-inventory-page'
+      };
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
+      statusEl.textContent = '';
+
+      try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.ok) {
+          statusEl.textContent = '✓ Thank you! We\'ll contact you shortly about this item.';
+          statusEl.style.color = '#2e7d32';
+          e.target.reset();
+        } else {
+          throw new Error(result.error || 'Submission failed');
+        }
+      } catch (error) {
+        console.error('Submission error:', error);
+        statusEl.textContent = 'Something went wrong. Please call us at (587) 731-0695.';
+        statusEl.style.color = '#d32f2f';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Inquiry';
+      }
+    });
+  </script>
+
+  <style>
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #142645;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .form-group small {
+      display: block;
+      margin-top: 0.25rem;
+      color: #666;
+      font-size: 0.875rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</body>
+</html>

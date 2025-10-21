@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Donate Furniture | Moving Forward to New Beginnings</title>
+  <meta name="description" content="Schedule a pickup for your quality furniture donations. Help families starting over in Red Deer and Central Alberta." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="inner">
+      <a href="index.html" class="brand" aria-label="Moving Forward to New Beginnings home">
+        <img src="logo.png" alt="Moving Forward to New Beginnings logo" />
+        <span>Moving Forward to New Beginnings</span>
+      </a>
+      <nav class="primary-nav" aria-label="Primary">
+        <a href="index.html#services">Services</a>
+        <a href="index.html#community">Community</a>
+        <a href="donate.html">Donate</a>
+        <a href="junk-removal.html">Junk Removal</a>
+        <a href="index.html#contact">Contact</a>
+      </nav>
+      <div class="header-cta">
+        <a href="tel:+15877310695">Call (587) 731-0695</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1>Donate Quality Furniture</h1>
+        <p>Your gently used furniture can give a family a fresh start. We pick up quality items and deliver them to people escaping domestic violence, newcomers, and neighbours rebuilding after hardship.</p>
+      </div>
+    </section>
+
+    <section class="container" style="padding: 3rem 0;">
+      <div class="grid-cards" style="margin-bottom: 3rem;">
+        <article class="card">
+          <h3>✓ What We Accept</h3>
+          <ul style="text-align: left; margin-left: 1.5rem;">
+            <li>Clean, smoke-free furniture</li>
+            <li>No rips, stains, or major damage</li>
+            <li>Structurally sound and safe</li>
+            <li>Sofas, beds, dressers, tables</li>
+            <li>Working appliances (case by case)</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>✗ What We Can't Take</h3>
+          <ul style="text-align: left; margin-left: 1.5rem;">
+            <li>Heavily stained or damaged items</li>
+            <li>Mattresses with stains/tears</li>
+            <li>Items with strong odors</li>
+            <li>Broken or unsafe furniture</li>
+            <li>Junk or unusable items</li>
+          </ul>
+          <p style="margin-top: 1rem;"><strong>Need to get rid of these items?</strong><br />
+          <a href="junk-removal.html" style="color: #2563eb;">Check out our junk removal services →</a></p>
+        </article>
+      </div>
+
+      <div style="max-width: 800px; margin: 0 auto;">
+        <h2>Schedule a Pickup</h2>
+        <p style="margin-bottom: 2rem;">Fill out the form below and we'll contact you within 1-2 business days to confirm your donation and schedule pickup.</p>
+        
+        <form id="donationForm" class="donation-form" novalidate>
+          <div class="form-group">
+            <label for="name">Your Name *</label>
+            <input type="text" id="name" name="name" required autocomplete="name" />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" autocomplete="email" />
+            <small>We'll send pickup confirmation to this email</small>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number *</label>
+            <input type="tel" id="phone" name="phone" required autocomplete="tel" inputmode="tel" />
+          </div>
+
+          <div class="form-group">
+            <label for="address">Pickup Address *</label>
+            <input type="text" id="address" name="address" required autocomplete="street-address" />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pickupDate">Preferred Pickup Date</label>
+              <input type="date" id="pickupDate" name="pickupDate" />
+            </div>
+
+            <div class="form-group">
+              <label for="timeWindow">Preferred Time</label>
+              <select id="timeWindow" name="timeWindow">
+                <option value="">Flexible</option>
+                <option value="Morning (8am-12pm)">Morning (8am-12pm)</option>
+                <option value="Afternoon (12pm-5pm)">Afternoon (12pm-5pm)</option>
+                <option value="Evening (5pm-8pm)">Evening (5pm-8pm)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="itemDescription">What are you donating? *</label>
+            <textarea id="itemDescription" name="itemDescription" rows="4" required placeholder="Example: Queen bed frame, dresser, dining table with 4 chairs"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="itemCondition">Item Condition *</label>
+            <select id="itemCondition" name="itemCondition" required>
+              <option value="">Select condition</option>
+              <option value="Excellent - Like new">Excellent - Like new</option>
+              <option value="Good - Minor wear">Good - Minor wear</option>
+              <option value="Fair - Some wear but functional">Fair - Some wear but functional</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="photos">Photos (optional)</label>
+            <input type="text" id="photos" name="photos" placeholder="Paste photo links here (Google Drive, Dropbox, etc.)" />
+            <small>Photos help us assess items faster. You can also text photos to (587) 731-0695</small>
+          </div>
+
+          <div class="form-group">
+            <label for="access">Access Details</label>
+            <textarea id="access" name="access" rows="2" placeholder="Example: Ground floor, elevator available, stairs to 2nd floor"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="notes">Additional Notes</label>
+            <textarea id="notes" name="notes" rows="3" placeholder="Anything else we should know?"></textarea>
+          </div>
+
+          <div id="donationTurnstile" class="turnstile-slot" aria-live="polite"></div>
+
+          <button type="submit" class="btn-primary" style="width: 100%;">Schedule Pickup</button>
+          <p id="donationStatus" role="status" style="margin-top: 1rem;"></p>
+        </form>
+      </div>
+    </section>
+
+    <section class="container highlight" style="margin: 3rem auto;">
+      <h3>Where Your Donation Goes</h3>
+      <p>Every quality item we pick up is cleaned, inspected, and delivered to families who need it most—survivors of domestic violence starting fresh, newcomers building their first home, and neighbours recovering from hardship. Your generosity creates stability and dignity for people in Red Deer and Central Alberta.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <h4>Moving Forward to New Beginnings</h4>
+        <p>Serving Red Deer and Central Alberta with compassionate moving services.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul class="footer-nav">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="donate.html">Donate Furniture</a></li>
+          <li><a href="junk-removal.html">Junk Removal</a></li>
+          <li><a href="corporate-giving.html">Corporate Giving</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul class="footer-contact">
+          <li><a href="tel:+15877310695">(587) 731-0695</a></li>
+          <li><a href="mailto:info@mftnb.ca">info@mftnb.ca</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE'; // Replace with your deployed script URL
+    const TURNSTILE_SITE_KEY = 'YOUR_TURNSTILE_SITE_KEY'; // Replace with your Cloudflare Turnstile site key
+
+    let turnstileWidgetId = null;
+
+    // Initialize Turnstile
+    function initTurnstile() {
+      if (typeof turnstile !== 'undefined') {
+        const container = document.getElementById('donationTurnstile');
+        if (container && !turnstileWidgetId) {
+          turnstileWidgetId = turnstile.render('#donationTurnstile', {
+            sitekey: TURNSTILE_SITE_KEY,
+            theme: 'light',
+            action: 'donation_pickup'
+          });
+        }
+      }
+    }
+
+    // Wait for Turnstile to load
+    if (typeof turnstile !== 'undefined') {
+      initTurnstile();
+    } else {
+      window.addEventListener('load', () => {
+        setTimeout(initTurnstile, 500);
+      });
+    }
+
+    // Form submission
+    document.getElementById('donationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const statusEl = document.getElementById('donationStatus');
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      
+      // Get form data
+      const formData = new FormData(e.target);
+      const data = {
+        formType: 'donation-pickup',
+        name: formData.get('name'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        address: formData.get('address'),
+        pickupDate: formData.get('pickupDate'),
+        timeWindow: formData.get('timeWindow'),
+        itemDescription: formData.get('itemDescription'),
+        itemCondition: formData.get('itemCondition'),
+        photos: formData.get('photos'),
+        access: formData.get('access'),
+        notes: formData.get('notes'),
+        source: 'donation-page'
+      };
+
+      // Get Turnstile token
+      if (turnstileWidgetId !== null && typeof turnstile !== 'undefined') {
+        data.turnstileToken = turnstile.getResponse(turnstileWidgetId);
+      }
+
+      if (!data.turnstileToken) {
+        statusEl.textContent = 'Please complete the verification check.';
+        statusEl.style.color = '#d32f2f';
+        return;
+      }
+
+      // Disable button
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+      statusEl.textContent = '';
+
+      try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.ok) {
+          statusEl.textContent = '✓ Thank you! We\'ll contact you within 1-2 business days to schedule pickup.';
+          statusEl.style.color = '#2e7d32';
+          e.target.reset();
+          if (turnstileWidgetId !== null && typeof turnstile !== 'undefined') {
+            turnstile.reset(turnstileWidgetId);
+          }
+        } else {
+          throw new Error(result.error || 'Submission failed');
+        }
+      } catch (error) {
+        console.error('Submission error:', error);
+        statusEl.textContent = 'Something went wrong. Please call us at (587) 731-0695.';
+        statusEl.style.color = '#d32f2f';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Schedule Pickup';
+      }
+    });
+  </script>
+</body>
+</html>
