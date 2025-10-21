@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="additional_styles.css" />
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
 </head>
 <body>
@@ -23,6 +24,8 @@
         <a href="index.html#community">Community</a>
         <a href="donate.html">Donate</a>
         <a href="furniture-available.html">Available Furniture</a>
+        <a href="junk-removal.html">Junk Removal</a>
+        <a href="corporate-giving.html">Corporate Giving</a>
         <a href="index.html#contact">Contact</a>
       </nav>
       <div class="header-cta">
@@ -118,8 +121,8 @@
           <textarea id="message" name="message" rows="3" placeholder="Any questions or additional details?"></textarea>
         </div>
 
-        <button type="submit" class="btn-primary" style="width: 100%;">Send Inquiry</button>
-        <p id="inquiryStatus" role="status" style="margin-top: 1rem;"></p>
+        <button type="submit" class="btn-primary">Send Inquiry</button>
+        <p id="inquiryStatus" class="form-status" role="status"></p>
       </form>
     </section>
   </main>
@@ -153,7 +156,7 @@
     // In a real implementation, this would fetch from your Google Sheets via Apps Script
     // For now, this is a template showing how it would work
     
-    const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2kTp_RynPKZptrLJrsv_DvS_-el2bzBz8Jc_QaEej2nHop5iABnMcuEa5pff2No9W8g/exec';
     
     // Sample inventory data structure (in production, fetch from Google Sheets)
     const sampleInventory = [
@@ -335,6 +338,7 @@
 
       submitBtn.disabled = true;
       submitBtn.textContent = 'Sending...';
+      statusEl.dataset.status = '';
       statusEl.textContent = '';
 
       try {
@@ -347,16 +351,16 @@
         const result = await response.json();
 
         if (result.ok) {
+          statusEl.dataset.status = 'success';
           statusEl.textContent = '✓ Thank you! We\'ll contact you shortly about this item.';
-          statusEl.style.color = '#2e7d32';
           e.target.reset();
         } else {
           throw new Error(result.error || 'Submission failed');
         }
       } catch (error) {
         console.error('Submission error:', error);
+        statusEl.dataset.status = 'error';
         statusEl.textContent = 'Something went wrong. Please call us at (587) 731-0695.';
-        statusEl.style.color = '#d32f2f';
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Send Inquiry';
@@ -364,55 +368,5 @@
     });
   </script>
 
-  <style>
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-      color: #142645;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-family: inherit;
-      font-size: 1rem;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      outline: none;
-      border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    }
-
-    .form-group small {
-      display: block;
-      margin-top: 0.25rem;
-      color: #666;
-      font-size: 0.875rem;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-
-    @media (max-width: 768px) {
-      .form-row {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
 </body>
 </html>

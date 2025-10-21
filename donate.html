@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Junk Removal Services | Moving Forward to New Beginnings</title>
-  <meta name="description" content="Responsible junk removal services in Red Deer and Central Alberta. We handle unwanted items, cleanouts, and responsible disposal." />
+  <title>Donate Furniture | Moving Forward to New Beginnings</title>
+  <meta name="description" content="Schedule a pickup for your quality furniture donations. Help families starting over in Red Deer and Central Alberta." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="additional_styles.css" />
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
@@ -24,6 +25,8 @@
         <a href="index.html#community">Community</a>
         <a href="donate.html">Donate</a>
         <a href="junk-removal.html">Junk Removal</a>
+        <a href="corporate-giving.html">Corporate Giving</a>
+        <a href="furniture-available.html">Available Furniture</a>
         <a href="index.html#contact">Contact</a>
       </nav>
       <div class="header-cta">
@@ -35,42 +38,42 @@
   <main>
     <section class="hero">
       <div class="container">
-        <h1>Junk Removal & Cleanout Services</h1>
-        <p>From estate cleanouts to post-renovation debris, we handle unwanted items responsibly. We donate what we can and dispose of the rest properly—so you don't have to worry about a thing.</p>
+        <h1>Donate Quality Furniture</h1>
+        <p>Your gently used furniture can give a family a fresh start. We pick up quality items and deliver them to people escaping domestic violence, newcomers, and neighbours rebuilding after hardship.</p>
       </div>
     </section>
 
     <section class="container" style="padding: 3rem 0;">
       <div class="grid-cards" style="margin-bottom: 3rem;">
         <article class="card">
-          <h3>What We Remove</h3>
+          <h3>✓ What We Accept</h3>
           <ul style="text-align: left; margin-left: 1.5rem;">
-            <li>Old furniture & appliances</li>
-            <li>Renovation debris</li>
-            <li>Estate cleanouts</li>
-            <li>Garage & basement items</li>
-            <li>Yard waste & construction materials</li>
-            <li>E-waste (electronics)</li>
+            <li>Clean, smoke-free furniture</li>
+            <li>No rips, stains, or major damage</li>
+            <li>Structurally sound and safe</li>
+            <li>Sofas, beds, dressers, tables</li>
+            <li>Working appliances (case by case)</li>
           </ul>
         </article>
         <article class="card">
-          <h3>Our Process</h3>
+          <h3>✗ What We Can't Take</h3>
           <ul style="text-align: left; margin-left: 1.5rem;">
-            <li>Free quote after reviewing your needs</li>
-            <li>Scheduled pickup at your convenience</li>
-            <li>We handle all loading & hauling</li>
-            <li>Donate usable items when possible</li>
-            <li>Responsible disposal & recycling</li>
-            <li>Leave your space clean</li>
+            <li>Heavily stained or damaged items</li>
+            <li>Mattresses with stains/tears</li>
+            <li>Items with strong odors</li>
+            <li>Broken or unsafe furniture</li>
+            <li>Junk or unusable items</li>
           </ul>
+          <p style="margin-top: 1rem;"><strong>Need to get rid of these items?</strong><br />
+          <a href="junk-removal.html" style="color: #2563eb;">Check out our junk removal services →</a></p>
         </article>
       </div>
 
       <div style="max-width: 800px; margin: 0 auto;">
-        <h2>Request Junk Removal</h2>
-        <p style="margin-bottom: 2rem;">Tell us what you need removed and we'll contact you with a quote within 1 business day.</p>
+        <h2>Schedule a Pickup</h2>
+        <p style="margin-bottom: 2rem;">Fill out the form below and we'll contact you within 1-2 business days to confirm your donation and schedule pickup.</p>
         
-        <form id="junkForm" class="donation-form" novalidate>
+        <form id="donationForm" class="donation-form" novalidate>
           <div class="form-group">
             <label for="name">Your Name *</label>
             <input type="text" id="name" name="name" required autocomplete="name" />
@@ -79,7 +82,7 @@
           <div class="form-group">
             <label for="email">Email</label>
             <input type="email" id="email" name="email" autocomplete="email" />
-            <small>We'll send your quote to this email</small>
+            <small>We'll send pickup confirmation to this email</small>
           </div>
 
           <div class="form-group">
@@ -88,14 +91,14 @@
           </div>
 
           <div class="form-group">
-            <label for="address">Service Address *</label>
+            <label for="address">Pickup Address *</label>
             <input type="text" id="address" name="address" required autocomplete="street-address" />
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="serviceDate">Preferred Service Date</label>
-              <input type="date" id="serviceDate" name="serviceDate" />
+              <label for="pickupDate">Preferred Pickup Date</label>
+              <input type="date" id="pickupDate" name="pickupDate" />
             </div>
 
             <div class="form-group">
@@ -110,43 +113,47 @@
           </div>
 
           <div class="form-group">
-            <label for="junkDescription">What needs to be removed? *</label>
-            <textarea id="junkDescription" name="junkDescription" rows="4" required placeholder="Describe the items: furniture, appliances, debris, etc."></textarea>
+            <label for="itemDescription">What are you donating? *</label>
+            <textarea id="itemDescription" name="itemDescription" rows="4" required placeholder="Example: Queen bed frame, dresser, dining table with 4 chairs"></textarea>
           </div>
 
           <div class="form-group">
-            <label for="estimatedVolume">Estimated Volume *</label>
-            <select id="estimatedVolume" name="estimatedVolume" required>
-              <option value="">Select volume</option>
-              <option value="Small load (fits in pickup truck)">Small load (fits in pickup truck)</option>
-              <option value="Medium load (1/4 to 1/2 truck)">Medium load (1/4 to 1/2 truck)</option>
-              <option value="Large load (full truck)">Large load (full truck)</option>
-              <option value="Extra large (multiple truck loads)">Extra large (multiple truck loads)</option>
-              <option value="Unsure - need assessment">Unsure - need assessment</option>
+            <label for="itemCondition">Item Condition *</label>
+            <select id="itemCondition" name="itemCondition" required>
+              <option value="">Select condition</option>
+              <option value="Excellent - Like new">Excellent - Like new</option>
+              <option value="Good - Minor wear">Good - Minor wear</option>
+              <option value="Fair - Some wear but functional">Fair - Some wear but functional</option>
             </select>
           </div>
 
           <div class="form-group">
+            <label for="photos">Photos (optional)</label>
+            <input type="text" id="photos" name="photos" placeholder="Paste photo links here (Google Drive, Dropbox, etc.)" />
+            <small>Photos help us assess items faster. You can also text photos to (587) 731-0695</small>
+          </div>
+
+          <div class="form-group">
             <label for="access">Access Details</label>
-            <textarea id="access" name="access" rows="2" placeholder="Example: Basement items, need to go through garage, alley access"></textarea>
+            <textarea id="access" name="access" rows="2" placeholder="Example: Ground floor, elevator available, stairs to 2nd floor"></textarea>
           </div>
 
           <div class="form-group">
             <label for="notes">Additional Notes</label>
-            <textarea id="notes" name="notes" rows="3" placeholder="Any hazardous materials? Heavy items? Special considerations?"></textarea>
+            <textarea id="notes" name="notes" rows="3" placeholder="Anything else we should know?"></textarea>
           </div>
 
-          <div id="junkTurnstile" class="turnstile-slot" aria-live="polite"></div>
+          <div id="donationTurnstile" class="turnstile-slot" aria-live="polite"></div>
 
-          <button type="submit" class="btn-primary" style="width: 100%;">Request Quote</button>
-          <p id="junkStatus" role="status" style="margin-top: 1rem;"></p>
+          <button type="submit" class="btn-primary">Schedule Pickup</button>
+          <p id="donationStatus" class="form-status" role="status"></p>
         </form>
       </div>
     </section>
 
     <section class="container highlight" style="margin: 3rem auto;">
-      <h3>Responsible Disposal</h3>
-      <p>We believe in doing the right thing—not just the easy thing. Before anything goes to the landfill, we assess whether it can be donated, recycled, or repurposed. Usable furniture goes to families in need. Electronics are recycled properly. Hazardous materials are disposed of according to local regulations. You get a clean space, and the environment benefits too.</p>
+      <h3>Where Your Donation Goes</h3>
+      <p>Every quality item we pick up is cleaned, inspected, and delivered to families who need it most—survivors of domestic violence starting fresh, newcomers building their first home, and neighbours recovering from hardship. Your generosity creates stability and dignity for people in Red Deer and Central Alberta.</p>
     </section>
   </main>
 
@@ -176,20 +183,20 @@
   </footer>
 
   <script>
-    const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE'; // Replace with your deployed script URL
-    const TURNSTILE_SITE_KEY = 'YOUR_TURNSTILE_SITE_KEY'; // Replace with your Cloudflare Turnstile site key
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2kTp_RynPKZptrLJrsv_DvS_-el2bzBz8Jc_QaEej2nHop5iABnMcuEa5pff2No9W8g/exec';
+    const TURNSTILE_SITE_KEY = '0x4AAAAAAB2kYqJ0EOGNbli7';
 
     let turnstileWidgetId = null;
 
     // Initialize Turnstile
     function initTurnstile() {
       if (typeof turnstile !== 'undefined') {
-        const container = document.getElementById('junkTurnstile');
+        const container = document.getElementById('donationTurnstile');
         if (container && !turnstileWidgetId) {
-          turnstileWidgetId = turnstile.render('#junkTurnstile', {
+          turnstileWidgetId = turnstile.render('#donationTurnstile', {
             sitekey: TURNSTILE_SITE_KEY,
             theme: 'light',
-            action: 'junk_removal'
+            action: 'donation_pickup'
           });
         }
       }
@@ -205,27 +212,28 @@
     }
 
     // Form submission
-    document.getElementById('junkForm').addEventListener('submit', async (e) => {
+    document.getElementById('donationForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      const statusEl = document.getElementById('junkStatus');
+      const statusEl = document.getElementById('donationStatus');
       const submitBtn = e.target.querySelector('button[type="submit"]');
       
       // Get form data
       const formData = new FormData(e.target);
       const data = {
-        formType: 'junk-removal',
+        formType: 'donation-pickup',
         name: formData.get('name'),
         email: formData.get('email'),
         phone: formData.get('phone'),
         address: formData.get('address'),
-        serviceDate: formData.get('serviceDate'),
+        pickupDate: formData.get('pickupDate'),
         timeWindow: formData.get('timeWindow'),
-        junkDescription: formData.get('junkDescription'),
-        estimatedVolume: formData.get('estimatedVolume'),
+        itemDescription: formData.get('itemDescription'),
+        itemCondition: formData.get('itemCondition'),
+        photos: formData.get('photos'),
         access: formData.get('access'),
         notes: formData.get('notes'),
-        source: 'junk-removal-page'
+        source: 'donation-page'
       };
 
       // Get Turnstile token
@@ -234,14 +242,15 @@
       }
 
       if (!data.turnstileToken) {
+        statusEl.dataset.status = 'error';
         statusEl.textContent = 'Please complete the verification check.';
-        statusEl.style.color = '#d32f2f';
         return;
       }
 
       // Disable button
       submitBtn.disabled = true;
       submitBtn.textContent = 'Submitting...';
+      statusEl.dataset.status = '';
       statusEl.textContent = '';
 
       try {
@@ -254,8 +263,8 @@
         const result = await response.json();
 
         if (result.ok) {
-          statusEl.textContent = '✓ Thank you! We\'ll contact you with a quote within 1 business day.';
-          statusEl.style.color = '#2e7d32';
+          statusEl.dataset.status = 'success';
+          statusEl.textContent = '✓ Thank you! We\'ll contact you within 1-2 business days to schedule pickup.';
           e.target.reset();
           if (turnstileWidgetId !== null && typeof turnstile !== 'undefined') {
             turnstile.reset(turnstileWidgetId);
@@ -265,11 +274,11 @@
         }
       } catch (error) {
         console.error('Submission error:', error);
+        statusEl.dataset.status = 'error';
         statusEl.textContent = 'Something went wrong. Please call us at (587) 731-0695.';
-        statusEl.style.color = '#d32f2f';
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Request Quote';
+        submitBtn.textContent = 'Schedule Pickup';
       }
     });
   </script>
