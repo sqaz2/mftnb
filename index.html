@@ -165,6 +165,25 @@
             </div>
             <div class="notice">We only submit your answers after you press <strong>Send to MFTNB</strong>.</div>
             <div id="summaryList" class="summary-list" role="list"></div>
+            <div class="estimate-results" aria-live="polite">
+              <div class="result-card">
+                <div class="result-label">Estimated labor time</div>
+                <div class="result-value" id="estimatedTime">Pending inputs…</div>
+                <div class="result-subtext" id="crewRecommendation"></div>
+              </div>
+              <div class="result-card">
+                <div class="result-label">Projected cost</div>
+                <div class="result-value" id="estimatedCost">Pending inputs…</div>
+                <div class="result-subtext" id="costBreakdown"></div>
+              </div>
+            </div>
+            <div class="cheat-sheet">
+              <div class="cheat-sheet-header">
+                <h4>Mover cheat-sheet</h4>
+                <button type="button" class="btn-link" id="downloadCheatSheet">Download notes</button>
+              </div>
+              <pre id="cheatSheetText" class="cheat-sheet-text">Answer the prompts to generate crew-ready notes.</pre>
+            </div>
             <div class="checkbox-consent">
               <input type="checkbox" id="consent" />
               <label for="consent">I agree to the <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and allow the team to contact me about my move.</label>
