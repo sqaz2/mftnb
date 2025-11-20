@@ -472,6 +472,72 @@ textarea.input-field {
   top: 96px;
 }
 
+.estimate-results {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.result-card {
+  background: linear-gradient(135deg, rgba(63, 126, 219, 0.08), rgba(198, 67, 72, 0.08));
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(20, 38, 69, 0.08);
+}
+
+.result-label {
+  font-weight: 600;
+  color: var(--brand-navy);
+}
+
+.result-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0.15rem 0;
+}
+
+.result-subtext {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.cheat-sheet {
+  background: rgba(20, 38, 69, 0.04);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(20, 38, 69, 0.08);
+  margin-bottom: 1rem;
+}
+
+.cheat-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.cheat-sheet-text {
+  white-space: pre-wrap;
+  margin: 0.5rem 0 0 0;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.range-wrap {
+  display: grid;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.input-range {
+  width: 100%;
+}
+
+.range-value {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
 .summary-panel h3 {
   margin-top: 0;
   margin-bottom: 0.75rem;
@@ -892,10 +958,20 @@ textarea.input-field {
     padding: 3.5rem 0;
   }
   .chat-log {
-    max-height: min(60dvh, 520px);
+    max-height: calc(50dvh - 60px);
+    padding-bottom: 0.5rem;
   }
   .chat-composer {
     padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 1.5rem));
+    position: sticky;
+    bottom: 0;
+    background: rgba(249, 251, 255, 0.95);
+  }
+  .chat-shell {
+    min-height: min(95dvh, 900px);
+  }
+  .estimate-results {
+    grid-template-columns: 1fr;
   }
 }
 

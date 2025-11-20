@@ -51,7 +51,7 @@ const questions = [
     type: 'textarea',
     required: true,
     placeholder: '456 New Place, Lacombe, AB',
-    prompt: () => 'Great! What is the destination address?' 
+    prompt: () => 'Great! What is the destination address?'
   },
   {
     id: 'homeType',
@@ -85,12 +85,110 @@ const questions = [
     ]
   },
   {
+    id: 'boxCount',
+    label: 'Boxes or totes',
+    type: 'number',
+    required: true,
+    min: 0,
+    prompt: () => 'Roughly how many packed boxes or totes will movers handle?'
+  },
+  {
+    id: 'smallItemCount',
+    label: 'Small loose items',
+    type: 'number',
+    required: true,
+    min: 0,
+    prompt: () => 'How many small loose items or bags need moving (kitchen appliances, art, lamps)?'
+  },
+  {
+    id: 'twoPersonItems',
+    label: 'Two-person items',
+    type: 'number',
+    required: true,
+    min: 0,
+    prompt: () => 'How many heavy items will need two movers (dressers, sofas, appliances)?'
+  },
+  {
+    id: 'fragileItems',
+    label: 'Fragile or delicate pieces',
+    type: 'number',
+    required: true,
+    min: 0,
+    prompt: () => 'Count delicate or fragile pieces needing extra padding (glass cabinets, antiques, art).'
+  },
+  {
+    id: 'carryDistance',
+    label: 'Longest carry distance (m)',
+    type: 'number',
+    required: true,
+    min: 0,
+    prompt: () => 'What is the longest carry distance from truck to door at either home (in meters)?'
+  },
+  {
+    id: 'stairsFrom',
+    label: 'Stairs leaving home',
+    type: 'number',
+    required: true,
+    min: 0,
+    prompt: () => 'How many flights of stairs leaving your current place (total up or down)?'
+  },
+  {
+    id: 'stairsTo',
+    label: 'Stairs entering new home',
+    type: 'number',
+    required: true,
+    min: 0,
+    prompt: () => 'How many flights of stairs into the destination space?'
+  },
+  {
+    id: 'elevatorAccess',
+    label: 'Elevator access',
+    type: 'select',
+    required: true,
+    prompt: () => 'Is there elevator access at either location?',
+    options: [
+      { value: '', label: 'Select an option' },
+      { value: 'None', label: 'No elevator access' },
+      { value: 'Shared elevator', label: 'Shared elevator available' },
+      { value: 'Booked elevator', label: 'Booked / dedicated elevator' }
+    ]
+  },
+  {
+    id: 'parkingDistance',
+    label: 'Parking distance & clearance',
+    type: 'textarea',
+    required: true,
+    placeholder: 'Loading bay, underground clearance, street parking time limits…',
+    prompt: () => 'Tell us about parking distance, loading bays, and overhead clearance at each address.'
+  },
+  {
     id: 'accessDetails',
     label: 'Access details',
     type: 'textarea',
     required: true,
-    placeholder: 'Loading dock, elevator booking, stairs, parking instructions…',
-    prompt: () => 'Tell us about stairs, elevators, parking, or anything special at either location.'
+    placeholder: 'Loading dock timing, tight hallways, floor numbers, service entrances…',
+    prompt: () => 'Share any other access logistics (service elevator bookings, gate codes, floor numbers).'
+  },
+  {
+    id: 'stackingComfort',
+    label: 'Stacking comfort',
+    type: 'select',
+    required: true,
+    prompt: () => 'How comfortable are you with stacking boxes and furniture to speed the move?',
+    options: [
+      { value: '', label: 'Select an option' },
+      { value: 'Tight stacking okay', label: 'Tight stacking okay to save trips' },
+      { value: 'Moderate stacking', label: 'Moderate stacking with clear pathways' },
+      { value: 'Minimal stacking', label: 'Minimal stacking—keep things low' }
+    ]
+  },
+  {
+    id: 'overheadRisks',
+    label: 'Overhead & fragile risks',
+    type: 'textarea',
+    required: false,
+    placeholder: 'Low ceilings, sprinkler heads, chandeliers, narrow halls…',
+    prompt: () => 'Any low ceilings, sprinklers, or tight turns that need extra care overhead?'
   },
   {
     id: 'moveDate',
@@ -114,6 +212,43 @@ const questions = [
       { value: 'Flexible / unsure', label: 'Flexible / unsure' }
     ],
     helper: 'Skip if you are flexible—we will confirm a window with you.'
+  },
+  {
+    id: 'season',
+    label: 'Season or weather',
+    type: 'select',
+    required: true,
+    prompt: () => 'What season or weather should we plan for?',
+    options: [
+      { value: '', label: 'Select an option' },
+      { value: 'Peak summer', label: 'Peak summer' },
+      { value: 'Winter / icy', label: 'Winter / icy' },
+      { value: 'Shoulder season', label: 'Spring / fall shoulder season' }
+    ]
+  },
+  {
+    id: 'prioritySlider',
+    label: 'Budget vs speed slider',
+    type: 'range',
+    required: true,
+    min: 1,
+    max: 10,
+    step: 1,
+    prompt: () => 'Slide toward 1 for budget-friendly pacing, or toward 10 for fastest completion.',
+    helper: 'We will balance crew size and pace based on this.'
+  },
+  {
+    id: 'priorityQuiz',
+    label: 'Customer priority quiz',
+    type: 'select',
+    required: true,
+    prompt: () => 'Which statement best matches your move?',
+    options: [
+      { value: '', label: 'Select an option' },
+      { value: 'Keep costs lean, I can help carry', label: 'Keep costs lean, I can help carry' },
+      { value: 'Balance care and speed', label: 'Balance care and speed' },
+      { value: 'Finish fast with full-service help', label: 'Finish fast with full-service help' }
+    ]
   },
   {
     id: 'specialItems',
@@ -155,6 +290,22 @@ const summaryDefinitions = [
   { id: 'fromAddress', label: 'Moving from' },
   { id: 'toAddress', label: 'Moving to' },
   {
+    id: 'inventory',
+    label: 'Inventory snapshot',
+    formatter: state => {
+      const parts = [];
+      const boxCount = numericField(state.boxCount);
+      const smallItems = numericField(state.smallItemCount);
+      const twoPerson = numericField(state.twoPersonItems);
+      const fragile = numericField(state.fragileItems);
+      if (boxCount > 0) parts.push(`${boxCount} boxes/totes`);
+      if (smallItems > 0) parts.push(`${smallItems} small loose items`);
+      if (twoPerson > 0) parts.push(`${twoPerson} two-person items`);
+      if (fragile > 0) parts.push(`${fragile} fragile pieces`);
+      return parts.length ? parts.join(' · ') : 'Pending—add box counts and specialty items.';
+    }
+  },
+  {
     id: 'schedule',
     label: 'Move date & time',
     formatter: state => {
@@ -173,9 +324,30 @@ const summaryDefinitions = [
     }
   },
   {
+    id: 'accessProfile',
+    label: 'Access profile',
+    formatter: state => {
+      const distance = numericField(state.carryDistance);
+      const stairs = numericField(state.stairsFrom) + numericField(state.stairsTo);
+      const elevator = state.elevatorAccess || 'Pending elevator details';
+      const stacking = state.stackingComfort || 'Stacking preference pending';
+      const parts = [];
+      if (distance) parts.push(`Longest carry ~${distance} m`);
+      if (stairs) parts.push(`${stairs} total flights`);
+      parts.push(elevator);
+      parts.push(stacking);
+      return parts.filter(Boolean).join(' · ');
+    }
+  },
+  {
     id: 'accessDetails',
     label: 'Access & parking',
     formatter: state => state.accessDetails || 'Let us know about stairs, elevators, or parking instructions.'
+  },
+  {
+    id: 'parkingDistance',
+    label: 'Parking & clearance notes',
+    formatter: state => state.parkingDistance || 'Share parking distance, overhead clearance, or time limits.'
   },
   {
     id: 'specialItems',
@@ -199,6 +371,20 @@ const summaryDefinitions = [
         return 'No extra services selected.';
       }
       return 'Choose all that apply or leave blank if not needed.';
+    }
+  },
+  {
+    id: 'prioritySummary',
+    label: 'Priorities',
+    formatter: state => {
+      const slider = numericField(state.prioritySlider);
+      const quiz = state.priorityQuiz;
+      const season = state.season;
+      const parts = [];
+      if (slider) parts.push(`Pace slider: ${slider}/10`);
+      if (quiz) parts.push(`Quiz: ${quiz}`);
+      if (season) parts.push(season);
+      return parts.length ? parts.join(' · ') : 'Tell us how to balance budget, speed, and weather.';
     }
   },
   {
@@ -238,6 +424,12 @@ const consentCheckbox = document.getElementById('consent');
 const sendEstimateBtn = document.getElementById('sendEstimate');
 const restartBtn = document.getElementById('restartEstimate');
 const estimateStatus = document.getElementById('estimateStatus');
+const estimatedTimeEl = document.getElementById('estimatedTime');
+const estimatedCostEl = document.getElementById('estimatedCost');
+const crewRecommendationEl = document.getElementById('crewRecommendation');
+const costBreakdownEl = document.getElementById('costBreakdown');
+const cheatSheetTextEl = document.getElementById('cheatSheetText');
+const cheatSheetDownloadBtn = document.getElementById('downloadCheatSheet');
 const quickForm = document.getElementById('quickForm');
 const quickStatus = document.getElementById('quickStatus');
 const quickNameInput = document.getElementById('quickName');
@@ -282,6 +474,10 @@ if (sendEstimateBtn) {
 
 if (quickForm) {
   quickForm.addEventListener('submit', submitQuickMessage);
+}
+
+if (cheatSheetDownloadBtn) {
+  cheatSheetDownloadBtn.addEventListener('click', downloadCheatSheet);
 }
 
 function initializeTurnstileWidgets() {
@@ -497,6 +693,38 @@ function buildInputForQuestion(question) {
     element = document.createElement('textarea');
     element.className = 'input-field';
     element.rows = 4;
+  } else if (question.type === 'number') {
+    element = document.createElement('input');
+    element.type = 'number';
+    element.className = 'input-field';
+    if (typeof question.min !== 'undefined') element.min = question.min;
+    if (typeof question.max !== 'undefined') element.max = question.max;
+    if (typeof question.step !== 'undefined') element.step = question.step;
+    if (estimateState[question.id] || estimateState[question.id] === 0) {
+      element.value = estimateState[question.id];
+    }
+  } else if (question.type === 'range') {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'range-wrap';
+    const valueLabel = document.createElement('div');
+    valueLabel.className = 'range-value';
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.className = 'input-range';
+    slider.min = question.min ?? 0;
+    slider.max = question.max ?? 10;
+    slider.step = question.step ?? 1;
+    slider.value = estimateState[question.id] || slider.min;
+    valueLabel.textContent = `Now: ${slider.value}`;
+    slider.addEventListener('input', () => {
+      valueLabel.textContent = `Now: ${slider.value}`;
+    });
+    wrapper.appendChild(slider);
+    wrapper.appendChild(valueLabel);
+    inputHolder.appendChild(wrapper);
+    activeInputElement = slider;
+    chatSubmit.disabled = false;
+    return;
   } else if (question.type === 'select') {
     element = document.createElement('select');
     element.className = 'input-field';
@@ -544,7 +772,7 @@ function buildInputForQuestion(question) {
     element.addEventListener('change', () => {
       chatSubmit.disabled = question.required && !element.value;
     });
-  } else if (question.type === 'textarea' || question.type === 'text' || question.type === 'email' || question.type === 'tel' || question.type === 'date') {
+  } else if (question.type === 'textarea' || question.type === 'text' || question.type === 'email' || question.type === 'tel' || question.type === 'date' || question.type === 'number') {
     chatSubmit.disabled = question.required && !element.value;
     element.addEventListener('input', () => {
       chatSubmit.disabled = question.required && !element.value;
@@ -574,8 +802,18 @@ function handleChatSubmit(event) {
     value = activeInputElement.value;
   }
 
-  if (question.type === 'date' && activeInputElement) {
+  if ((question.type === 'date' || question.type === 'range') && activeInputElement) {
     value = activeInputElement.value;
+  }
+
+  if (question.type === 'number') {
+    const parsed = Number(value);
+    value = Number.isFinite(parsed) ? parsed : '';
+  }
+
+  if (question.type === 'range') {
+    const parsed = Number(value);
+    value = Number.isFinite(parsed) ? parsed : '';
   }
 
   if (question.required) {
@@ -583,7 +821,9 @@ function handleChatSubmit(event) {
       // Allow empty selection on required multiselect because question encourages but does not force.
       value = [];
     }
-    if (!value || (Array.isArray(value) && value.length === 0)) {
+    const isEmptyArray = Array.isArray(value) && value.length === 0;
+    const isEmptyValue = value === '' || value === null || typeof value === 'undefined';
+    if (isEmptyArray || isEmptyValue) {
       setError('Please provide an answer to continue.');
       return;
     }
@@ -609,6 +849,8 @@ function handleChatSubmit(event) {
     estimateState[question.id] = Array.isArray(value) ? value : [];
   } else if (question.type === 'date') {
     estimateState[question.id] = value;
+  } else if (question.type === 'number' || question.type === 'range') {
+    estimateState[question.id] = value === '' ? '' : Number(value);
   } else {
     estimateState[question.id] = value;
   }
@@ -643,6 +885,9 @@ function renderSummary() {
     wrapper.appendChild(valueEl);
     summaryList.appendChild(wrapper);
   });
+
+  const model = computeMoveModel(estimateState);
+  updateEstimateOutputs(model);
 }
 
 function updateProgress() {
@@ -664,6 +909,26 @@ function updateSubmitAvailability() {
   const answeredAll = questions.every(q => Object.prototype.hasOwnProperty.call(estimateState, q.id));
   const ready = answeredAll && consentCheckbox && consentCheckbox.checked && !!estimateTurnstileToken && !isSubmittingEstimate;
   sendEstimateBtn.disabled = !ready;
+}
+
+function updateEstimateOutputs(model) {
+  const formattedHours = `${model.productiveHours.toFixed(1)} hrs (${model.paddedHours[0].toFixed(1)}–${model.paddedHours[1].toFixed(1)} hrs range)`;
+  if (estimatedTimeEl) {
+    estimatedTimeEl.textContent = formattedHours;
+  }
+  if (crewRecommendationEl) {
+    crewRecommendationEl.textContent = `${model.crewSize} movers · ${model.costRange}`;
+  }
+  if (estimatedCostEl) {
+    estimatedCostEl.textContent = `$${model.estimatedCost.toLocaleString()}`;
+  }
+  if (costBreakdownEl) {
+    const speedNote = estimateState.priorityQuiz || 'Balanced pace';
+    costBreakdownEl.textContent = `Includes travel fee $${model.travelFee} and per-mover rate $${model.perMoverRate}/hr · ${speedNote}`;
+  }
+  if (cheatSheetTextEl) {
+    cheatSheetTextEl.textContent = generateCheatSheet(estimateState, model);
+  }
 }
 
 function findNextQuestionIndex() {
@@ -699,7 +964,7 @@ function formatAnswer(question, value) {
   if (question.type === 'date' && value) {
     return formatDate(value);
   }
-  if (!value) {
+  if (!value && value !== 0) {
     if (question.required) {
       return 'Provided';
     }
@@ -718,6 +983,11 @@ function formatDate(value) {
     }
   }
   return value;
+}
+
+function numericField(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function appendSystemBubble(text) {
@@ -772,6 +1042,66 @@ function clearStatus(el) {
   el.classList.remove('success', 'error');
 }
 
+function computeMoveModel(state) {
+  const boxCount = numericField(state.boxCount);
+  const smallItems = numericField(state.smallItemCount);
+  const twoPersonItems = numericField(state.twoPersonItems);
+  const fragileItems = numericField(state.fragileItems);
+  const totalUnits = boxCount + smallItems + twoPersonItems + fragileItems;
+  const baseMinutes = boxCount * 3 + smallItems * 5 + twoPersonItems * 12 + fragileItems * 8;
+  const flights = numericField(state.stairsFrom) + numericField(state.stairsTo);
+  const distanceFactor = 1 + Math.min(0.6, numericField(state.carryDistance) / 50);
+  const elevatorFactor = state.elevatorAccess === 'Booked elevator' ? 0.85 : (state.elevatorAccess === 'Shared elevator' ? 0.95 : 1.15);
+  const stackingFactor = state.stackingComfort === 'Tight stacking okay' ? 0.92 : (state.stackingComfort === 'Minimal stacking' ? 1.1 : 1);
+  const seasonFactor = state.season === 'Winter / icy' ? 1.1 : (state.season === 'Peak summer' ? 1.05 : 1);
+  const prioritySlider = numericField(state.prioritySlider);
+  const paceFactor = prioritySlider ? Math.min(1.15, Math.max(0.85, 1 - (prioritySlider - 5) * 0.03)) : 1;
+  const stairMinutes = totalUnits * flights * 0.4;
+  const heavyBias = twoPersonItems > 4 ? 1.1 : 1;
+  const totalMinutes = (baseMinutes * distanceFactor * elevatorFactor * stackingFactor * seasonFactor * paceFactor * heavyBias) + stairMinutes;
+  const baseHours = totalMinutes / 60;
+
+  let crewSize = 2;
+  if (baseHours > 6 || totalUnits > 80) crewSize = 3;
+  if (baseHours > 9 || totalUnits > 140) crewSize = 4;
+  const productiveHours = Math.max(2, baseHours * (2 / crewSize));
+  const perMoverRate = 85;
+  const travelFee = 120;
+  const estimatedCost = Math.round(productiveHours * crewSize * perMoverRate + travelFee);
+  const paddedHoursLow = Math.max(2, productiveHours - 0.5);
+  const paddedHoursHigh = productiveHours + 0.75;
+  const costLow = Math.round(paddedHoursLow * crewSize * perMoverRate + travelFee);
+  const costHigh = Math.round(paddedHoursHigh * crewSize * perMoverRate + travelFee);
+
+  return {
+    crewSize,
+    baseHours,
+    productiveHours,
+    estimatedCost,
+    costRange: `$${costLow.toLocaleString()}–$${costHigh.toLocaleString()}`,
+    perMoverRate,
+    travelFee,
+    totalUnits,
+    flights,
+    factors: { distanceFactor, elevatorFactor, stackingFactor, seasonFactor, paceFactor, heavyBias },
+    paddedHours: [paddedHoursLow, paddedHoursHigh]
+  };
+}
+
+function generateCheatSheet(state, model) {
+  const lines = [];
+  lines.push(`Crew: ${model.crewSize} movers with ${model.perMoverRate}/hr rate; travel fee $${model.travelFee}.`);
+  lines.push(`Inventory: ${numericField(state.boxCount)} boxes, ${numericField(state.smallItemCount)} small items, ${numericField(state.twoPersonItems)} two-person items, ${numericField(state.fragileItems)} fragile.`);
+  lines.push(`Access: carry ${numericField(state.carryDistance)} m, ${numericField(state.stairsFrom)} flights out / ${numericField(state.stairsTo)} in, elevator: ${state.elevatorAccess || 'n/a'}.`);
+  if (state.parkingDistance) lines.push(`Parking/clearance: ${state.parkingDistance}`);
+  if (state.overheadRisks) lines.push(`Overhead risks: ${state.overheadRisks}`);
+  lines.push(`Stacking: ${state.stackingComfort || 'standard'}; pace slider ${numericField(state.prioritySlider) || 'n/a'}.`);
+  if (state.specialItems) lines.push(`Specialty items: ${state.specialItems}`);
+  if (state.extraServices && state.extraServices.length) lines.push(`Extras: ${state.extraServices.join(', ')}`);
+  lines.push(`Estimate: ${model.productiveHours.toFixed(1)} hrs with ${model.costRange} range.`);
+  return lines.join('\n');
+}
+
 function submitEstimate() {
   if (!sendEstimateBtn || sendEstimateBtn.disabled || isSubmittingEstimate) return;
   const payload = buildEstimatePayload();
@@ -822,6 +1152,8 @@ function submitEstimate() {
 }
 
 function buildEstimatePayload() {
+  const model = computeMoveModel(estimateState);
+  const cheatSheet = generateCheatSheet(estimateState, model);
   const extras = Array.isArray(estimateState.extraServices) ? estimateState.extraServices : [];
   return {
     formType: 'estimate',
@@ -837,13 +1169,44 @@ function buildEstimatePayload() {
     homeSize: estimateState.bedrooms || '',
     bedrooms: estimateState.bedrooms || '',
     access: estimateState.accessDetails || '',
+    parking: estimateState.parkingDistance || '',
+    stairsFrom: estimateState.stairsFrom || '',
+    stairsTo: estimateState.stairsTo || '',
+    carryDistance: estimateState.carryDistance || '',
+    elevatorAccess: estimateState.elevatorAccess || '',
+    stackingComfort: estimateState.stackingComfort || '',
+    overheadRisks: estimateState.overheadRisks || '',
+    season: estimateState.season || '',
     inventory: estimateState.specialItems || '',
+    boxCount: estimateState.boxCount || '',
+    smallItemCount: estimateState.smallItemCount || '',
+    twoPersonItems: estimateState.twoPersonItems || '',
+    fragileItems: estimateState.fragileItems || '',
+    prioritySlider: estimateState.prioritySlider || '',
+    priorityQuiz: estimateState.priorityQuiz || '',
     extras,
     notes: estimateState.notes || '',
+    estimatedHours: model.productiveHours,
+    estimatedCost: model.estimatedCost,
+    costRange: model.costRange,
+    crewSize: model.crewSize,
+    cheatSheet,
     source: 'website-chat-estimator',
     turnstileToken: estimateTurnstileToken,
     consent: !!(consentCheckbox && consentCheckbox.checked)
   };
+}
+
+function downloadCheatSheet() {
+  const model = computeMoveModel(estimateState);
+  const cheatSheet = generateCheatSheet(estimateState, model);
+  const blob = new Blob([cheatSheet], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'mftnb-move-notes.txt';
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 function submitQuickMessage(event) {
