@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Corporate Giving | Moving Forward to New Beginnings</title>
+  <meta name="description" content="Partner with us to support families in need. Donate furniture, sponsor moves, or support our community rescue program." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="additional_styles.css" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="inner">
+      <a href="index.html" class="brand" aria-label="Moving Forward to New Beginnings home">
+        <img src="logo.png" alt="Moving Forward to New Beginnings logo" />
+        <span>Moving Forward to New Beginnings</span>
+      </a>
+      <nav class="primary-nav" aria-label="Primary">
+        <a href="index.html#services">Services</a>
+        <a href="index.html#community">Community</a>
+        <a href="donate.html">Donate</a>
+        <a href="corporate-giving.html">Corporate Giving</a>
+        <a href="junk-removal.html">Junk Removal</a>
+        <a href="furniture-available.html">Available Furniture</a>
+        <a href="index.html#contact">Contact</a>
+      </nav>
+      <div class="header-cta">
+        <a href="tel:+15877310695">Call (587) 731-0695</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1>Corporate Giving & Partnerships</h1>
+        <p>Your company can make a direct impact on families rebuilding their lives. Partner with us to donate furniture, sponsor moving services, or support our rescue move program.</p>
+      </div>
+    </section>
+
+    <section class="container" style="padding: 3rem 0;">
+      <div class="section-heading">
+        <h2>Ways Your Company Can Help</h2>
+        <p>We work with businesses across Red Deer and Central Alberta to create meaningful community impact.</p>
+      </div>
+
+      <div class="grid-cards" style="margin-bottom: 3rem;">
+        <article class="card">
+          <h3>🛋️ Furniture Donations</h3>
+          <p>Upgrading your office? Closing a location? We pick up quality furniture and deliver it to families starting over. Perfect for:</p>
+          <ul style="text-align: left; margin-left: 1.5rem; margin-top: 1rem;">
+            <li>Office furniture & equipment</li>
+            <li>Hotel room furnishings</li>
+            <li>Retail display items</li>
+            <li>Restaurant seating & tables</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>🚚 Sponsored Moves</h3>
+          <p>Cover the cost of a move for a family fleeing domestic violence. Your sponsorship includes:</p>
+          <ul style="text-align: left; margin-left: 1.5rem; margin-top: 1rem;">
+            <li>Professional moving crew & truck</li>
+            <li>Safe, discreet service</li>
+            <li>Recognition (if desired)</li>
+            <li>Tax receipt for your donation</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>🤝 Ongoing Partnership</h3>
+          <p>Become a monthly supporter and keep our rescue move program running. Options include:</p>
+          <ul style="text-align: left; margin-left: 1.5rem; margin-top: 1rem;">
+            <li>Monthly financial contribution</li>
+            <li>Employee volunteer days</li>
+            <li>Truck or equipment donation</li>
+            <li>Promotional partnership</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="highlight" style="margin: 3rem 0;">
+        <h3>Your Impact</h3>
+        <p>For every set of paid moves we complete, we perform a rescue move at no charge for a family fleeing violence. Corporate partners help us maintain this 1:1 ratio and expand our reach. In 2024 alone, we've helped 47 families transition to safety—and with your support, we can do even more.</p>
+      </div>
+
+      <div style="max-width: 800px; margin: 3rem auto;">
+        <h2>Start a Partnership Conversation</h2>
+        <p style="margin-bottom: 2rem;">Tell us about your company's giving goals and we'll work together to create a meaningful partnership.</p>
+        
+        <form id="corporateForm" class="donation-form" novalidate>
+          <div class="form-group">
+            <label for="companyName">Company Name *</label>
+            <input type="text" id="companyName" name="companyName" required autocomplete="organization" />
+          </div>
+
+          <div class="form-group">
+            <label for="contactName">Your Name *</label>
+            <input type="text" id="contactName" name="contactName" required autocomplete="name" />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email *</label>
+            <input type="email" id="email" name="email" required autocomplete="email" />
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number *</label>
+            <input type="tel" id="phone" name="phone" required autocomplete="tel" inputmode="tel" />
+          </div>
+
+          <div class="form-group">
+            <label for="donationType">Type of Support *</label>
+            <select id="donationType" name="donationType" required>
+              <option value="">Select an option</option>
+              <option value="furniture">Furniture donation</option>
+              <option value="moving-services">Sponsor moving services</option>
+              <option value="both">Both furniture & moving sponsorship</option>
+              <option value="ongoing">Ongoing partnership</option>
+              <option value="other">Other / Not sure yet</option>
+            </select>
+          </div>
+
+          <div class="form-group conditional-group" id="furnitureGroup" style="display: none;">
+            <label for="furnitureItems">Furniture Items Available</label>
+            <textarea id="furnitureItems" name="furnitureItems" rows="3" placeholder="Describe the furniture: quantity, type, condition"></textarea>
+          </div>
+
+          <div class="form-group conditional-group" id="valueGroup" style="display: none;">
+            <label for="estimatedValue">Estimated Value (optional)</label>
+            <input type="text" id="estimatedValue" name="estimatedValue" placeholder="For tax receipt purposes" />
+          </div>
+
+          <div class="form-group conditional-group" id="sponsorshipGroup" style="display: none;">
+            <label for="sponsorshipInterest">Sponsorship Interest</label>
+            <select id="sponsorshipInterest" name="sponsorshipInterest">
+              <option value="">Select an option</option>
+              <option value="one-time">One-time sponsored move</option>
+              <option value="quarterly">Quarterly sponsorship</option>
+              <option value="monthly">Monthly partnership</option>
+              <option value="discuss">Let's discuss options</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="notes">Tell us about your giving goals</label>
+            <textarea id="notes" name="notes" rows="4" placeholder="What impact does your company want to make? Any specific preferences or questions?"></textarea>
+          </div>
+
+          <div id="corporateTurnstile" class="turnstile-slot" aria-live="polite"></div>
+
+          <button type="submit" class="btn-primary">Start Partnership Discussion</button>
+          <p id="corporateStatus" class="form-status" role="status"></p>
+        </form>
+      </div>
+    </section>
+
+    <section class="container" style="padding: 3rem 0;">
+      <div class="section-heading">
+        <h2>Current Partners</h2>
+        <p>We're grateful to work with businesses who share our commitment to supporting families in need.</p>
+      </div>
+      <div style="text-align: center; padding: 2rem; background: #f5f5f5; border-radius: 8px;">
+        <p><em>Is your company interested in being featured here? Let's talk about a partnership.</em></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <h4>Moving Forward to New Beginnings</h4>
+        <p>Serving Red Deer and Central Alberta with compassionate moving services.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul class="footer-nav">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="donate.html">Donate Furniture</a></li>
+          <li><a href="junk-removal.html">Junk Removal</a></li>
+          <li><a href="corporate-giving.html">Corporate Giving</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul class="footer-contact">
+          <li><a href="tel:+15877310695">(587) 731-0695</a></li>
+          <li><a href="mailto:info@mftnb.ca">info@mftnb.ca</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2kTp_RynPKZptrLJrsv_DvS_-el2bzBz8Jc_QaEej2nHop5iABnMcuEa5pff2No9W8g/exec';
+    const TURNSTILE_SITE_KEY = '0x4AAAAAAB2kYqJ0EOGNbli7';
+
+    let turnstileWidgetId = null;
+
+    // Show/hide conditional fields based on donation type
+    document.getElementById('donationType').addEventListener('change', (e) => {
+      const value = e.target.value;
+      const furnitureGroup = document.getElementById('furnitureGroup');
+      const valueGroup = document.getElementById('valueGroup');
+      const sponsorshipGroup = document.getElementById('sponsorshipGroup');
+
+      // Hide all first
+      furnitureGroup.style.display = 'none';
+      valueGroup.style.display = 'none';
+      sponsorshipGroup.style.display = 'none';
+
+      // Show relevant fields
+      if (value === 'furniture' || value === 'both') {
+        furnitureGroup.style.display = 'block';
+        valueGroup.style.display = 'block';
+      }
+      if (value === 'moving-services' || value === 'both' || value === 'ongoing') {
+        sponsorshipGroup.style.display = 'block';
+      }
+    });
+
+    // Initialize Turnstile
+    function initTurnstile() {
+      if (typeof turnstile !== 'undefined') {
+        const container = document.getElementById('corporateTurnstile');
+        if (container && !turnstileWidgetId) {
+          turnstileWidgetId = turnstile.render('#corporateTurnstile', {
+            sitekey: TURNSTILE_SITE_KEY,
+            theme: 'light',
+            action: 'corporate_donor'
+          });
+        }
+      }
+    }
+
+    // Wait for Turnstile to load
+    if (typeof turnstile !== 'undefined') {
+      initTurnstile();
+    } else {
+      window.addEventListener('load', () => {
+        setTimeout(initTurnstile, 500);
+      });
+    }
+
+    // Form submission
+    document.getElementById('corporateForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const statusEl = document.getElementById('corporateStatus');
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      
+      // Get form data
+      const formData = new FormData(e.target);
+      const data = {
+        formType: 'corporate-donor',
+        companyName: formData.get('companyName'),
+        contactName: formData.get('contactName'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        donationType: formData.get('donationType'),
+        furnitureItems: formData.get('furnitureItems'),
+        estimatedValue: formData.get('estimatedValue'),
+        sponsorshipInterest: formData.get('sponsorshipInterest'),
+        notes: formData.get('notes'),
+        source: 'corporate-giving-page'
+      };
+
+      // Get Turnstile token
+      if (turnstileWidgetId !== null && typeof turnstile !== 'undefined') {
+        data.turnstileToken = turnstile.getResponse(turnstileWidgetId);
+      }
+
+      if (!data.turnstileToken) {
+        statusEl.dataset.status = 'error';
+        statusEl.textContent = 'Please complete the verification check.';
+        return;
+      }
+
+      // Disable button
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+      statusEl.dataset.status = '';
+      statusEl.textContent = '';
+
+      try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.ok) {
+          statusEl.dataset.status = 'success';
+          statusEl.textContent = '✓ Thank you! We\'ll reach out within 1-2 business days to discuss partnership opportunities.';
+          e.target.reset();
+          if (turnstileWidgetId !== null && typeof turnstile !== 'undefined') {
+            turnstile.reset(turnstileWidgetId);
+          }
+          // Reset conditional fields
+          document.getElementById('furnitureGroup').style.display = 'none';
+          document.getElementById('valueGroup').style.display = 'none';
+          document.getElementById('sponsorshipGroup').style.display = 'none';
+        } else {
+          throw new Error(result.error || 'Submission failed');
+        }
+      } catch (error) {
+        console.error('Submission error:', error);
+        statusEl.dataset.status = 'error';
+        statusEl.textContent = 'Something went wrong. Please email us at info@mftnb.ca or call (587) 731-0695.';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Start Partnership Discussion';
+      }
+    });
+  </script>
+</body>
+</html>
