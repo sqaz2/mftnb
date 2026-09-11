@@ -1,0 +1,115 @@
+name: Prepare estimate wording correction
+on:
+  push:
+    branches: [fix/estimate-wording-20260911]
+    paths: ['.github/workflows/prepare-estimate-wording.yml']
+permissions:
+  contents: write
+jobs:
+  prepare-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply terminology-only correction
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          paths = (
+              'index.html', 'script.js', 'docs/ESTIMATOR-AUDIT.md',
+              'tests/estimator.test.cjs', 'tests/browser_smoke.py',
+              '.github/workflows/production-smoke.yml',
+          )
+          replacements = {'quote':'estimate', 'quotes':'estimates', 'quoted':'estimated',
+                          'quotation':'estimate', 'quotations':'estimates'}
+          def replace_word(match):
+              old = match.group(0)
+              new = replacements[old.lower()]
+              return new.upper() if old.isupper() else new.capitalize() if old[0].isupper() else new
+          for name in paths:
+              path = Path(name)
+              old = path.read_text()
+              new = re.sub(r'\b(?:quotations?|quoted|quotes?)\b', replace_word, old, flags=re.I)
+              new = new.replace('a estimate', 'an estimate').replace('A estimate', 'An estimate')
+              if name in ('index.html', 'script.js'):
+                  new = new.replace('2026-09-11-review-first', '2026-09-11-estimates-only')
+              if name.endswith('production-smoke.yml'):
+                  needle = "                  html = body.decode('utf-8')\n"
+                  assert needle in new
+                  new = new.replace(needle, needle + "                  if re.search(r'\\bquot(?:e[ds]?|ing|ations?)\\b', html, re.I):\n                      raise RuntimeError('Homepage contains disallowed pricing terminology')\n")
+              path.write_text(new)
+              print(name, 'updated' if old != new else 'unchanged')
+
+          workflow = Path('.github/workflows/estimator-tests.yml')
+          workflow.write_text(workflow.read_text().replace('node --test tests/estimator.test.cjs', 'node --test tests/*.test.cjs'))
+          documentation = Path('docs/ESTIMATOR-AUDIT.md')
+          documentation.write_text(documentation.read_text() + '\n## Terminology correction — September 11, 2026\n\nMFTNB uses **estimate** and **estimates** consistently across its website, guided prompts, result labels, downloaded move plans and submitted request notes. This wording change does not add automatic pricing or change the review-first workflow. The draft storage key is unchanged so existing in-tab answers are retained.\n')
+          Path('tests/terminology.test.cjs').write_text(r'''const test = require('node:test');
+          const assert = require('node:assert/strict');
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const E = require('../script.js');
+          const read = name => fs.readFileSync(path.join(__dirname, '..', name), 'utf8');
+          const disallowed = /\bquot(?:e[ds]?|ing|ations?)\b/i;
+
+          for (const name of ['index.html', 'script.js', 'privacy.html', 'apps_script.gs', 'README.txt', 'docs/ESTIMATOR-AUDIT.md']) {
+            test(`MFTNB pricing terminology stays estimate-only: ${name}`, () => {
+              assert.doesNotMatch(read(name), disallowed);
+            });
+          }
+          test('homepage consistently requests a reviewed estimate without promising a booking', () => {
+            const html = read('index.html');
+            assert.ok(html.includes('Plan your move. Get a reviewed estimate.'));
+            assert.ok(html.includes('Start your estimate request'));
+            assert.ok(html.includes('This is an estimate request, not a confirmed price or booking.'));
+            assert.ok(html.includes('Estimate after review'));
+            assert.doesNotMatch(html, /\ba estimate\b/i);
+          });
+          test('downloaded plan and submission notes use estimate terminology', () => {
+            const state = {moveType:'same-property', fromAddress:'123 Test Street, Red Deer', onSiteDetails:'Basement to garage'};
+            const plan = E.generateCheatSheet(state);
+            const payload = E.buildEstimatePayload(state, 'test-token', true);
+            assert.ok(plan.startsWith('MOVE PLAN — ESTIMATE REQUEST, NOT A CONFIRMED BOOKING'));
+            assert.equal(payload.source, 'website-estimate-request-v4');
+            assert.equal(payload.formType, 'estimate');
+            assert.equal(payload.notes, plan);
+            assert.doesNotMatch(plan, disallowed);
+            assert.equal(payload.estimatedCost, null);
+            assert.equal(payload.estimatedHours, null);
+            assert.equal(payload.crewSize, null);
+          });
+          test('new release invalidates script cache but keeps existing draft storage', () => {
+            const html = read('index.html');
+            const script = read('script.js');
+            const version = script.match(/const ESTIMATOR_VERSION = '([^']+)'/)[1];
+            assert.notEqual(version, '2026-09-11-review-first');
+            assert.ok(html.includes(`script.js?v=${version}`));
+            assert.ok(script.includes("const STORAGE_KEY = 'mftnb-estimate-v4'"));
+          });
+          ''')
+          PY
+      - name: Syntax and regression checks
+        run: |
+          node --check script.js
+          node --test tests/*.test.cjs
+          git diff --check
+      - name: Install offline browser test dependencies
+        run: |
+          python3 -m pip install playwright
+          python3 -m playwright install --with-deps chromium
+      - name: Run mocked browser flows without sending live leads
+        run: python3 tests/browser_smoke.py
+      - name: Save tested changes to the isolated branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html script.js docs/ESTIMATOR-AUDIT.md tests/estimator.test.cjs tests/browser_smoke.py tests/terminology.test.cjs .github/workflows/estimator-tests.yml .github/workflows/production-smoke.yml
+          git commit -m "Use estimate terminology consistently across MFTNB"
+          git push origin HEAD:fix/estimate-wording-20260911
+          echo "Tested source commit: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
