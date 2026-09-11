@@ -1,7 +1,7 @@
 'use strict';
 
-// Public quote requests are not calibrated price estimates. See docs/ESTIMATOR-AUDIT.md.
-const ESTIMATOR_VERSION = '2026-09-11-review-first';
+// Public estimate requests are not calibrated price estimates. See docs/ESTIMATOR-AUDIT.md.
+const ESTIMATOR_VERSION = '2026-09-11-estimates-only';
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2kTp_RynPKZptrLJrsv_DvS_-el2bzBz8Jc_QaEej2nHop5iABnMcuEa5pff2No9W8g/exec';
 const TURNSTILE_SITE_KEY = '0x4AAAAAAB2kYqJ0EOGNbli7';
 const STORAGE_KEY = 'mftnb-estimate-v4';
@@ -160,7 +160,7 @@ function answerText(q, value) {
   return String(value ?? '').trim() || 'None noted';
 }
 function generateCheatSheet(state, model = computeMoveModel(state)) {
-  const lines = ['MOVE PLAN — QUOTE REQUEST, NOT A CONFIRMED BOOKING', `Estimator version: ${ESTIMATOR_VERSION}`];
+  const lines = ['MOVE PLAN — ESTIMATE REQUEST, NOT A CONFIRMED BOOKING', `Estimator version: ${ESTIMATOR_VERSION}`];
   visibleQuestions(state).filter(q => !['name', 'email', 'phone'].includes(q.id)).forEach(q => {
     lines.push(`${q.label}: ${has(state, q.id) ? answerText(q, state[q.id]) : 'Not supplied'}`);
   });
@@ -176,7 +176,7 @@ function buildEstimatePayload(state, token, consent) {
   // The deployed Apps Script saves/emails `notes`, not all newer structured fields.
   // Carry the complete plan in that existing field until the backend is migrated.
   const payload = {
-    formType: 'estimate', submittedAt: new Date().toISOString(), source: 'website-quote-request-v4',
+    formType: 'estimate', submittedAt: new Date().toISOString(), source: 'website-estimate-request-v4',
     estimatorVersion: ESTIMATOR_VERSION, estimateStatus: model.status,
     name: text(state.name), email: text(state.email), phone: text(state.phone),
     pickup: text(state.fromAddress), dropoff: state.moveType === 'transport' ? text(state.toAddress) : text(state.fromAddress),
@@ -234,7 +234,7 @@ function initializePage() {
     const visible = visibleQuestions(state);
     active = visible.find(q => q.id === editingId) || visible.find(q => !eligible(q)) || null;
     $('chatLog').replaceChildren();
-    bubble('Let’s prepare your move details for a reviewed quote. You can edit any answer.', 'system');
+    bubble('Let’s prepare your move details for a reviewed estimate. You can edit any answer.', 'system');
     visible.filter(q => has(state, q.id)).forEach(q => {
       bubble(typeof q.prompt === 'function' ? q.prompt(state) : q.prompt, 'system');
       const el = bubble(answerText(q, state[q.id]), 'user');
@@ -287,7 +287,7 @@ function initializePage() {
     const model = computeMoveModel(state);
     $('estimatedTime').textContent = model.errors.length ? 'Check your answers' : 'Confirmed after review';
     $('crewRecommendation').textContent = 'Crew size and on-site hours are not assigned automatically.';
-    $('estimatedCost').textContent = 'Quote after review';
+    $('estimatedCost').textContent = 'Estimate after review';
     $('costBreakdown').textContent = model.errors.length ? model.errors.join(' ') : model.travelNote;
     $('cheatSheetText').textContent = generateCheatSheet(state, model);
     availability();
@@ -324,7 +324,7 @@ function initializePage() {
   $('sendEstimate').addEventListener('click', async () => {
     if (pending || !ready() || !$('consent').checked || !widgets.estimate.token) return;
     pending = true; availability(); $('sendEstimate').textContent = 'Sending…'; $('sendEstimate').setAttribute('aria-busy', 'true');
-    status('estimateStatus', 'Sending your quote request…');
+    status('estimateStatus', 'Sending your estimate request…');
     try {
       await send(buildEstimatePayload(state, widgets.estimate.token, true));
       state = {}; editingId = null; save(); $('consent').checked = false;

@@ -65,7 +65,7 @@ test('payload preserves zero and includes all details in existing backend notes'
   const state = {...sample, boxCount:0, stairsFrom:0, fragileItems:0, specialItems:'Test piano', extraServices:['Furniture assembly / disassembly'], notes:'Test instruction', parkingDistance:'Loading bay', overheadRisks:'Not part of this version'};
   const p = E.buildEstimatePayload(state, 'fake-token', true);
   assert.equal(p.boxCount, 0); assert.equal(p.stairsFrom, 0); assert.equal(p.dropoff, sample.fromAddress);
-  ['Test piano','Test instruction','Loading bay','Furniture assembly / disassembly','QUOTE REQUEST'].forEach(v => assert.ok(p.notes.includes(v)));
+  ['Test piano','Test instruction','Loading bay','Furniture assembly / disassembly','ESTIMATE REQUEST'].forEach(v => assert.ok(p.notes.includes(v)));
   assert.equal(p.notes, p.cheatSheet); assert.equal(p.estimatedCost, null); assert.equal(p.estimatedHours, null); assert.equal(p.consent,true);
 });
 test('hidden stale destination is not sent for on-site work', () => {
@@ -118,5 +118,5 @@ test('rounding charges only the configured increment',()=>assert.equal(E.priceRe
 for (const change of [{approvedBy:''},{evidenceRef:''},{rateBasis:'unknown'},{crewSize:0},{crewSize:2.5},{crewHours:0},{hourlyRate:-1},{taxRate:2},{callOutFee:undefined},{billingIncrementMinutes:0},{hourlyRate:1e99}]) test(`reviewed pricing fails closed: ${JSON.stringify(change)}`,()=>assert.throws(()=>E.priceReviewedPlan({...reviewed,...change})));
 test('static homepage makes no instant numeric promise and includes no-JS fallback',()=>{
   const html=fs.readFileSync(require('node:path').join(__dirname,'../index.html'),'utf8');
-  assert.ok(html.includes('Quote after review')); assert.ok(html.includes('<noscript>')); assert.ok(!html.includes('Projected cost')); assert.ok(!html.includes('Instant email confirmation'));
+  assert.ok(html.includes('Estimate after review')); assert.ok(html.includes('<noscript>')); assert.ok(!html.includes('Projected cost')); assert.ok(!html.includes('Instant email confirmation'));
 });

@@ -50,11 +50,11 @@ with sync_playwright() as p:
 
     with page_case() as (page,posts):
         assert page.locator('#input-moveType').count()==1
-        assert page.locator('#estimatedCost').inner_text()=='Quote after review'
+        assert page.locator('#estimatedCost').inner_text()=='Estimate after review'
         assert page.evaluate('document.activeElement.tagName')=='BODY'
         assert page.locator('#sendEstimate').is_disabled()
         assert not posts
-    passed('empty form: no numeric quote, no forced page focus, no unsolicited submit')
+    passed('empty form: no numeric estimate, no forced page focus, no unsolicited submit')
 
     with page_case() as (page,posts):
         while page.locator('#inputHolder [name]').count() or page.locator('#inputHolder input[type=checkbox]').count():
@@ -85,7 +85,7 @@ with sync_playwright() as p:
         assert 'Updated instructions' in page.locator('#cheatSheetText').inner_text()
         with page.expect_download() as download: page.locator('#downloadCheatSheet').click()
         content=Path(download.value.path()).read_text()
-        assert 'Updated instructions' in content and 'QUOTE REQUEST' in content and '$120' not in content
+        assert 'Updated instructions' in content and 'ESTIMATE REQUEST' in content and '$120' not in content
     passed('editing preserves textarea content; downloadable notes use current answers')
 
     with page_case(FIXTURE) as (page,posts):

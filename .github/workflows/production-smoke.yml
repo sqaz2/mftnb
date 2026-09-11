@@ -43,8 +43,8 @@ jobs:
           run_id = os.environ['GITHUB_RUN_ID']
           commit = os.environ['GITHUB_SHA']
           required_html = (
-              'Plan your move. Get a reviewed quote.',
-              'Quote after review',
+              'Plan your move. Get a reviewed estimate.',
+              'Estimate after review',
               'Confirmed after review',
               f'script.js?v={version}',
               'estimator.css',
@@ -73,6 +73,8 @@ jobs:
                   if 'text/html' not in content_type:
                       raise RuntimeError(f'Homepage has unexpected content type: {content_type}')
                   html = body.decode('utf-8')
+                  if re.search(r'\bquot(?:e[ds]?|ing|ations?)\b', html, re.I):
+                      raise RuntimeError('Homepage contains disallowed pricing terminology')
                   missing = [text for text in required_html if text not in html]
                   if missing:
                       raise RuntimeError(f'Homepage does not yet contain release markers: {missing}')
@@ -85,7 +87,7 @@ jobs:
                           raise RuntimeError(f'{name}: served bytes differ from release {commit}')
                       verified.append(f'{name}: SHA-256 {digest}')
                   report = [
-                      'PASS: https://mftnb.com serves the reviewed-quote release.',
+                      'PASS: https://mftnb.com serves the reviewed-estimate release.',
                       f'Release version: {version}',
                       f'Repository commit checked: {commit}',
                       'Homepage: HTTP 200; all five release markers present.',
