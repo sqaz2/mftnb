@@ -1,0 +1,109 @@
+name: Production deployment verification
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'script.js'
+      - '*.css'
+      - '.github/workflows/production-smoke.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mftnb-production-verification
+  cancel-in-progress: true
+jobs:
+  verify-public-site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify production HTML and exact release assets (GET only)
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import os
+          from pathlib import Path
+          import re
+          import time
+          import urllib.request
+
+          origin = 'https://mftnb.com'
+          script = Path('script.js').read_text()
+          version_match = re.search(r"const ESTIMATOR_VERSION = '([^']+)'", script)
+          if not version_match:
+              raise SystemExit('Cannot determine the expected estimator release version.')
+          version = version_match.group(1)
+          expected = {
+              name: hashlib.sha256(Path(name).read_bytes()).hexdigest()
+              for name in ('script.js', 'styles.css', 'estimator.css')
+          }
+          run_id = os.environ['GITHUB_RUN_ID']
+          commit = os.environ['GITHUB_SHA']
+          required_html = (
+              'Plan your move. Get a reviewed quote.',
+              'Quote after review',
+              'Confirmed after review',
+              f'script.js?v={version}',
+              'estimator.css',
+          )
+          last_error = ''
+
+          def get(path, attempt):
+              separator = '&' if '?' in path else '?'
+              url = f'{origin}/{path}{separator}release_check={run_id}-{attempt}'
+              request = urllib.request.Request(url, headers={
+                  'User-Agent': 'MFTNB-production-release-check/1.0',
+                  'Accept-Encoding': 'identity',
+                  'Cache-Control': 'no-cache',
+              })
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  if response.status != 200:
+                      raise RuntimeError(f'{path or "/"}: HTTP {response.status}')
+                  body = response.read(2_000_001)
+                  if len(body) > 2_000_000:
+                      raise RuntimeError(f'{path or "/"}: unexpected response size')
+                  return body, response.headers.get('Content-Type', ''), response.geturl()
+
+          for attempt in range(1, 19):
+              try:
+                  body, content_type, final_url = get('', attempt)
+                  if 'text/html' not in content_type:
+                      raise RuntimeError(f'Homepage has unexpected content type: {content_type}')
+                  html = body.decode('utf-8')
+                  missing = [text for text in required_html if text not in html]
+                  if missing:
+                      raise RuntimeError(f'Homepage does not yet contain release markers: {missing}')
+                  verified = []
+                  for name, expected_digest in expected.items():
+                      path = f'{name}?v={version}' if name == 'script.js' else name
+                      payload, mime, asset_url = get(path, attempt)
+                      digest = hashlib.sha256(payload).hexdigest()
+                      if digest != expected_digest:
+                          raise RuntimeError(f'{name}: served bytes differ from release {commit}')
+                      verified.append(f'{name}: SHA-256 {digest}')
+                  report = [
+                      'PASS: https://mftnb.com serves the reviewed-quote release.',
+                      f'Release version: {version}',
+                      f'Repository commit checked: {commit}',
+                      'Homepage: HTTP 200; all five release markers present.',
+                      *verified,
+                      'Only public GET requests were made. No forms, customer leads, email or Sheets submissions were sent.',
+                      'This check verifies deployed files, not production submission delivery or visual layout.',
+                  ]
+                  print('\n'.join(report), flush=True)
+                  with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+                      summary.write('## Production verification passed\n\n' + '\n\n'.join(report) + '\n')
+                  break
+              except Exception as error:
+                  last_error = str(error)
+                  print(f'Attempt {attempt}/18: {last_error}', flush=True)
+                  if attempt < 18:
+                      time.sleep(10)
+          else:
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+                  summary.write('## Production verification failed\n\n' + last_error + '\n')
+              raise SystemExit('The public domain did not verify within the bounded rollout window: ' + last_error)
+          PY
