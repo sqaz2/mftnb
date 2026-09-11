@@ -105,11 +105,11 @@ jobs:
           python3 -m playwright install --with-deps chromium
       - name: Run mocked browser flows without sending live leads
         run: python3 tests/browser_smoke.py
-      - name: Save tested changes to the isolated branch
+      - name: Save tested source changes to the isolated branch
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html script.js docs/ESTIMATOR-AUDIT.md tests/estimator.test.cjs tests/browser_smoke.py tests/terminology.test.cjs .github/workflows/estimator-tests.yml .github/workflows/production-smoke.yml
+          git add index.html script.js docs/ESTIMATOR-AUDIT.md tests/estimator.test.cjs tests/browser_smoke.py tests/terminology.test.cjs
           git commit -m "Use estimate terminology consistently across MFTNB"
           git push origin HEAD:fix/estimate-wording-20260911
           echo "Tested source commit: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
