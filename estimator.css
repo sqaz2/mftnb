@@ -1,0 +1,15 @@
+/* Keep the site's existing design; make reviewed plans and edits fit small screens. */
+.estimator-layout > *, .summary-panel, .input-field { min-width: 0; }
+.summary-panel { position: static; }
+.summary-item-value, .cheat-sheet-text { overflow-wrap: anywhere; }
+.chat-bubble.user .btn-link { color: inherit; }
+.chat-bubble .btn-link, .summary-item .btn-link, .composer-actions .btn-link {
+  min-height: 44px;
+  min-width: 44px;
+}
+.checkbox-grid { grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); }
+.chat-composer [aria-invalid="true"] { outline: 2px solid var(--brand-rose); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .chat-log { scroll-behavior: auto; }
+  .progress-bar span { transition: none; }
+}
