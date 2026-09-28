@@ -1,7 +1,8 @@
 'use strict';
 
 // Public estimate requests are not calibrated price estimates. See docs/ESTIMATOR-AUDIT.md.
-const ESTIMATOR_VERSION = '2026-09-11-estimates-only';
+const ESTIMATOR_VERSION = '2026-09-28-confirmed-travel';
+const Travel = typeof module !== 'undefined' && module.exports ? require('./travel.js') : window.MFTNBTravel;
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2kTp_RynPKZptrLJrsv_DvS_-el2bzBz8Jc_QaEej2nHop5iABnMcuEa5pff2No9W8g/exec';
 const TURNSTILE_SITE_KEY = '0x4AAAAAAB2kYqJ0EOGNbli7';
 const STORAGE_KEY = 'mftnb-estimate-v4';
@@ -68,6 +69,7 @@ function computeMoveModel(state = {}) {
     travelNote: !type ? 'Travel requirements not confirmed.' : type === 'transport'
       ? 'Route, driving time and any transport or crew call-out charge require review; no flat fee has been added.'
       : 'No transport between addresses requested. Any crew call-out or depot travel charge must be confirmed separately; no flat fee has been added.',
+    travel: Travel.currentTravel(state),
     crewSize: null, productiveHours: null, estimatedCost: null, costRange: null,
     perMoverRate: null, travelFee: null
   };
@@ -97,6 +99,13 @@ function priceReviewedPlan(plan) {
     transportCents, subtotalCents, taxCents, totalCents: subtotalCents + taxCents };
 }
 
+// Staff-only arithmetic entry point: supply reviewed work hours and rates explicitly.
+function priceReviewedMove(plan, state, settings = Travel.config()) {
+  if (plan?.moveType !== state.moveType) throw new Error('Reviewed scope must match the move.');
+  const hours = Travel.reviewedJobHours(state, { ...plan, onSiteHours: plan.crewHours }, settings);
+  return { ...priceReviewedPlan({ ...plan, betweenAddressDriveHours: hours.betweenAddressDriveHours, depotDriveHours: hours.depotDriveHours }), ...hours };
+}
+
 const select = (id, label, prompt, values, extra = {}) => ({ id, label, prompt, type: 'select', required: true, options: values.map(v => typeof v === 'string' ? { value: v, label: v } : v), ...extra });
 const count = (id, label, prompt, extra = {}) => ({ id, label, prompt, type: 'number', required: true, min: 0, max: 10000, step: 1, unknown: true, ...extra });
 const questionList = [
@@ -104,8 +113,8 @@ const questionList = [
   { id: 'name', label: 'Name', type: 'text', required: true, autocomplete: 'name', prompt: 'What is your name?' },
   { id: 'email', label: 'Email', type: 'email', required: true, autocomplete: 'email', prompt: 'What email should we use for your request?' },
   { id: 'phone', label: 'Phone', type: 'tel', required: true, autocomplete: 'tel', prompt: 'What phone number can we call or text about your move?' },
-  { id: 'fromAddress', label: 'Pickup / work address', type: 'textarea', required: true, prompt: s => s.moveType === 'transport' ? 'Where are you moving from? Include the address, unit and city.' : 'Where will the work take place? Include the address, unit and city.' },
-  { id: 'toAddress', label: 'Destination address', type: 'textarea', required: true, when: s => s.moveType === 'transport', prompt: 'What is the destination address, including the unit and city?' },
+  { id: 'fromAddress', label: 'Pickup / work address', type: 'address', required: true, prompt: s => s.moveType === 'transport' ? 'Where are you moving from?' : 'Where will the work take place?', helper: 'Check the municipality carefully—nearby towns can have the same street address.' },
+  { id: 'toAddress', label: 'Destination address', type: 'address', required: true, when: s => s.moveType === 'transport', prompt: 'What is the destination address?', helper: 'Select and confirm the destination. Keep the unit or lot number in its own field.' },
   { id: 'onSiteDetails', label: 'On-site route', type: 'textarea', required: true, when: s => s.moveType === 'same-property', prompt: 'Where are the items moving within the property? For example, basement to garage, or one unit to another.' },
   select('homeType', 'Home / property type', 'What kind of property are we working at?', ['Apartment / condo', 'Townhouse / duplex', 'Single-family home', 'Acreage / farm', 'Office / commercial', 'Storage unit', 'Other / unsure']),
   select('bedrooms', 'Rooms involved', 'How many rooms are involved? Count only the rooms you need help with.', ['A few items only', 'Studio / bachelor', '1 bedroom', '2 bedrooms', '3 bedrooms', '4+ bedrooms', 'Other / unsure']),
@@ -165,8 +174,9 @@ function generateCheatSheet(state, model = computeMoveModel(state)) {
     lines.push(`${q.label}: ${has(state, q.id) ? answerText(q, state[q.id]) : 'Not supplied'}`);
   });
   lines.push(`Inventory total: ${model.totalUnits === null ? 'Not confirmed' : model.totalUnits} (fragile pieces are a subset, not extra items).`);
-  lines.push('Crew size, on-site time and price: awaiting team review. No automatic price or duration has been calculated.');
+  lines.push('Crew size, on-site time and price: awaiting team review. No automatic price or on-site duration has been calculated.');
   lines.push(model.travelNote);
+  lines.push(...Travel.planLines(state));
   model.errors.forEach(e => lines.push(`Please correct: ${e}`));
   return lines.join('\n');
 }
@@ -185,6 +195,9 @@ function buildEstimatePayload(state, token, consent) {
     access: text(state.accessDetails), parking: text(state.parkingDistance), inventory: text(state.specialItems),
     extras: Array.isArray(state.extraServices) ? state.extraServices.slice() : [],
     notes: plan, customerNotes: text(state.notes), cheatSheet: plan,
+    locations: Object.fromEntries(Travel.ids(state).map(id => [id, Travel.cleanLocation(state[Travel.locationField(id)])])),
+    travel: Travel.currentTravel(state) || { status: 'unavailable', message: Travel.UNAVAILABLE, totalSeconds: null },
+    estimatedBillableJobHours: null, onSiteHours: null,
     estimatedHours: null, estimatedCost: null, costRange: null, crewSize: null,
     turnstileToken: token, consent: consent === true
   };
@@ -196,13 +209,18 @@ function sanitizeDraft(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
   const draft = {};
   questionList.forEach(q => { if (has(value, q.id) && !validateAnswer(q, value[q.id], value)) draft[q.id] = value[q.id]; });
+  Travel.ids(draft).forEach(id => {
+    const loc = Travel.cleanLocation(value[Travel.locationField(id)]);
+    if (loc && loc.formattedAddress === text(draft[id])) draft[Travel.locationField(id)] = loc;
+  });
+  // Routes and staff approvals are deliberately not restored from customer storage.
   return draft;
 }
 async function safeParseJson(response) {
   try { const data = JSON.parse(await response.text()); return data && typeof data === 'object' && !Array.isArray(data) ? data : null; }
   catch { return null; }
 }
-if (typeof module !== 'undefined' && module.exports) module.exports = { computeMoveModel, priceReviewedPlan, numericField, normalizeAddress, addressesMatch, validateAnswer, questionList, visibleQuestions, generateCheatSheet, buildEstimatePayload, sanitizeDraft, safeParseJson, localToday };
+if (typeof module !== 'undefined' && module.exports) module.exports = { computeMoveModel, priceReviewedPlan, priceReviewedMove, numericField, normalizeAddress, addressesMatch, validateAnswer, questionList, visibleQuestions, generateCheatSheet, buildEstimatePayload, sanitizeDraft, safeParseJson, localToday };
 
 if (typeof document !== 'undefined') initializePage();
 function initializePage() {
@@ -210,6 +228,7 @@ function initializePage() {
   const form = $('chatForm');
   if (!form) return;
   let state = {}, editingId = null, active = null, pending = false, quickPending = false;
+  let addressControl = null, routeRevision = 0, routeExpiry = null;
   const widgets = { estimate: { id: null, token: null }, quick_message: { id: null, token: null } };
   try {
     state = sanitizeDraft(JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}'));
@@ -222,15 +241,16 @@ function initializePage() {
       localStorage.removeItem(LEGACY_STORAGE_KEY);
     }
   } catch { /* Storage can be unavailable. The form still works in memory. */ }
-  function save() { try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {} }
+  function save() { try { const { travel, ...draft } = state; sessionStorage.setItem(STORAGE_KEY, JSON.stringify(draft)); } catch {} }
   function status(id, message, kind = '') { const el = $(id); if (!el) return; el.textContent = message; el.classList.remove('error', 'success'); if (kind) el.classList.add(kind); }
   function button(label, handler, className = 'btn-link') { const b = document.createElement('button'); b.type = 'button'; b.className = className; b.textContent = label; b.addEventListener('click', handler); return b; }
-  function eligible(q) { return has(state, q.id) && !validateAnswer(q, state[q.id], state); }
+  function eligible(q) { return has(state, q.id) && !validateAnswer(q, state[q.id], state) && (q.type !== 'address' || Travel.isConfirmed(state, q.id)); }
   function ready() { return visibleQuestions(state).every(eligible) && !computeMoveModel(state).errors.length; }
-  function availability() { $('sendEstimate').disabled = pending || !ready() || !$('consent').checked || !widgets.estimate.token; }
+  function availability() { $('sendEstimate').disabled = pending || state.travel?.status === 'loading' || !ready() || !$('consent').checked || !widgets.estimate.token; }
   function edit(id) { if (pending) return; editingId = id; render(true); }
   function bubble(message, kind) { const el = document.createElement('div'); el.className = `chat-bubble ${kind}`; el.textContent = message; $('chatLog').append(el); return el; }
   function render(focus = false) {
+    addressControl?.dispose(); addressControl = null;
     const visible = visibleQuestions(state);
     active = visible.find(q => q.id === editingId) || visible.find(q => !eligible(q)) || null;
     $('chatLog').replaceChildren();
@@ -243,6 +263,7 @@ function initializePage() {
     });
     $('inputError').textContent = '';
     $('inputHolder').replaceChildren();
+    form.dataset.questionType = active?.type || '';
     $('chatCompleteNote').hidden = !!active;
     $('chatCompleteNote').textContent = 'Review your summary below (or beside the chat), then verify and send your request.';
     $('promptText').textContent = active ? (typeof active.prompt === 'function' ? active.prompt(state) : active.prompt) : 'Your move plan is ready for review.';
@@ -255,7 +276,12 @@ function initializePage() {
     if (previous) { const b = button('Back', () => edit(previous.id)); b.dataset.extraAction = 'true'; actions.prepend(b); }
     if (active) {
       const q = active;
-      if (q.type === 'multiselect') {
+      if (q.type === 'address') {
+        addressControl = Travel.mountAddress({ container: $('inputHolder'), id: q.id, state, onInvalidate() {
+          Travel.invalidate(state, q.id); routeRevision++; clearTimeout(routeExpiry); save(); updateSummary();
+        } });
+        if (focus) addressControl.focus();
+      } else if (q.type === 'multiselect') {
         const grid = document.createElement('div'); grid.className = 'checkbox-grid'; grid.setAttribute('role', 'group'); grid.setAttribute('aria-labelledby', 'promptText');
         q.options.forEach(o => { const label = document.createElement('label'); label.className = 'checkbox-option'; const cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = o.value; cb.checked = Array.isArray(state[q.id]) && state[q.id].includes(o.value); label.append(cb, document.createTextNode(o.label)); grid.append(label); });
         $('inputHolder').append(grid);
@@ -274,11 +300,21 @@ function initializePage() {
       }
       if (q.unknown) { const b = button('Not sure', () => accept('unknown')); b.dataset.extraAction = 'true'; actions.append(b); }
     }
+    updateSummary(); refreshTravel();
+    if (focus) { $('chatLog').scrollTop = $('chatLog').scrollHeight; $('promptText').scrollIntoView({ block: 'nearest' }); }
+  }
+  function updateSummary() {
+    const visible = visibleQuestions(state);
     $('summaryList').replaceChildren();
     visible.filter(q => has(state, q.id)).forEach(q => {
       const row = document.createElement('div'); row.className = 'summary-item'; row.setAttribute('role', 'listitem');
       const label = document.createElement('div'); label.className = 'summary-item-label'; label.textContent = q.label;
       const value = document.createElement('div'); value.className = 'summary-item-value'; value.textContent = answerText(q, state[q.id]);
+      if (q.type === 'address') {
+        const loc = Travel.cleanLocation(state[Travel.locationField(q.id)]);
+        if (loc) value.textContent += ` — ${loc.municipality}${loc.unit ? `; unit / lot ${loc.unit}` : ''}`;
+        value.textContent += Travel.isConfirmed(state, q.id) ? ' · Customer confirmed' : ' · Confirmation required';
+      }
       const b = button('Edit', () => edit(q.id)); b.setAttribute('aria-label', `Edit ${q.label} in summary`); row.append(label, value, b); $('summaryList').append(row);
     });
     const answered = visible.filter(eligible).length;
@@ -290,22 +326,69 @@ function initializePage() {
     $('estimatedCost').textContent = 'Estimate after review';
     $('costBreakdown').textContent = model.errors.length ? model.errors.join(' ') : model.travelNote;
     $('cheatSheetText').textContent = generateCheatSheet(state, model);
-    availability();
-    if (focus) { $('chatLog').scrollTop = $('chatLog').scrollHeight; $('promptText').scrollIntoView({ block: 'nearest' }); }
+    renderTravel(); availability();
+  }
+  function renderTravel() {
+    const panel = $('travelSummary');
+    if (!panel) return;
+    panel.replaceChildren();
+    const add = (tag, message, className = '') => { const el = document.createElement(tag); el.textContent = message; el.className = className; panel.append(el); return el; };
+    add('h4', 'Estimated travel', 'travel-title');
+    const travel = Travel.currentTravel(state);
+    if (travel) {
+      const list = add('ol', '', 'travel-legs');
+      travel.legs.forEach(leg => { const row = document.createElement('li'); const label = document.createElement('span'); label.textContent = leg.label; const time = document.createElement('strong'); time.textContent = Travel.duration(leg.durationSeconds); row.append(label, time); list.append(row); });
+      add('p', `Total estimated travel: ${Travel.duration(travel.totalSeconds)}`, 'travel-total');
+      add('p', 'Google Maps driving estimate. Live traffic, loading and unloading are not included. Staff will check vehicle access and road restrictions.', 'result-subtext');
+      (travel.warnings || []).forEach(warning => add('p', warning, 'result-subtext'));
+    } else add('p', state.travel?.status === 'loading' ? 'Calculating estimated travel…' : Travel.UNAVAILABLE, 'travel-status');
+    add('p', state.moveType === 'transport' ? 'Shop → pickup → drop-off → shop' : 'Shop → work address → shop', 'travel-route');
+    add('p', 'Travel + staff-reviewed on-site work = estimated billable job hours. Total hours remain pending until staff review.', 'result-subtext');
+    if (state.travel?.status === 'unavailable' && Travel.routeSpec(state)) panel.append(button('Retry travel estimate', () => { delete state.travel; refreshTravel(); }));
+  }
+  async function refreshTravel() {
+    const spec = Travel.routeSpec(state);
+    if (!spec) return;
+    if (Travel.currentTravel(state) || (state.travel?.fingerprint === spec.fingerprint && ['loading', 'unavailable'].includes(state.travel.status))) return;
+    const revision = ++routeRevision;
+    state.travel = { status: 'loading', fingerprint: spec.fingerprint }; updateSummary();
+    try {
+      const travel = await Travel.calculate(state);
+      if (revision !== routeRevision || Travel.routeSpec(state)?.fingerprint !== spec.fingerprint) return;
+      state.travel = travel;
+      clearTimeout(routeExpiry);
+      routeExpiry = setTimeout(() => {
+        state.travel = { status: 'unavailable', fingerprint: spec.fingerprint, totalSeconds: null }; updateSummary();
+      }, Travel.MAX_AGE_MS);
+    } catch {
+      if (revision !== routeRevision || Travel.routeSpec(state)?.fingerprint !== spec.fingerprint) return;
+      state.travel = { status: 'unavailable', fingerprint: spec.fingerprint, totalSeconds: null };
+    }
+    updateSummary();
   }
   function accept(value) {
     if (!active || pending) return;
+    let location;
+    if (active.type === 'address') {
+      const result = addressControl.read();
+      if (result.error) { $('inputError').textContent = result.error; return; }
+      location = result.location; value = location.formattedAddress;
+    }
     const error = validateAnswer(active, value, state);
     if (error) { $('inputError').textContent = error; $(`input-${active.id}`)?.setAttribute('aria-invalid', 'true'); return; }
+    if (['moveType', 'moveDate', 'moveTime', 'fromAddress', 'toAddress'].includes(active.id)) {
+      delete state.travel; routeRevision++; clearTimeout(routeExpiry);
+    }
+    if (location) state[Travel.locationField(active.id)] = location;
     state[active.id] = active.type === 'number' && value !== 'unknown' ? Number(value) : value;
     editingId = null; save(); render(true);
   }
-  form.addEventListener('submit', e => { e.preventDefault(); if (!active) return; accept(active.type === 'multiselect' ? Array.from($('inputHolder').querySelectorAll('input:checked'), el => el.value) : $(`input-${active.id}`).value.trim()); });
+  form.addEventListener('submit', e => { e.preventDefault(); if (!active) return; accept(active.type === 'address' ? '' : active.type === 'multiselect' ? Array.from($('inputHolder').querySelectorAll('input:checked'), el => el.value) : $(`input-${active.id}`).value.trim()); });
   $('consent').addEventListener('change', availability);
   $('restartEstimate').addEventListener('click', () => {
     if (pending) return;
     if (Object.keys(state).length && !window.confirm('Clear your saved move details in this tab?')) return;
-    state = {}; editingId = null; save(); $('consent').checked = false; resetWidget('estimate'); status('estimateStatus', ''); render(true);
+    routeRevision++; clearTimeout(routeExpiry); state = {}; editingId = null; save(); $('consent').checked = false; resetWidget('estimate'); status('estimateStatus', ''); render(true);
   });
   $('downloadCheatSheet').addEventListener('click', () => {
     const url = URL.createObjectURL(new Blob([generateCheatSheet(state)], { type: 'text/plain;charset=utf-8' }));
@@ -322,12 +405,12 @@ function initializePage() {
     } finally { clearTimeout(timeout); }
   }
   $('sendEstimate').addEventListener('click', async () => {
-    if (pending || !ready() || !$('consent').checked || !widgets.estimate.token) return;
+    if (pending || state.travel?.status === 'loading' || !ready() || !$('consent').checked || !widgets.estimate.token) return;
     pending = true; availability(); $('sendEstimate').textContent = 'Sending…'; $('sendEstimate').setAttribute('aria-busy', 'true');
     status('estimateStatus', 'Sending your estimate request…');
     try {
       await send(buildEstimatePayload(state, widgets.estimate.token, true));
-      state = {}; editingId = null; save(); $('consent').checked = false;
+      routeRevision++; clearTimeout(routeExpiry); state = {}; editingId = null; save(); $('consent').checked = false;
       status('estimateStatus', 'Your request was received. The team will review it; no price or booking is confirmed yet.', 'success');
     } catch (err) { status('estimateStatus', `${err.message || 'Receipt could not be confirmed.'} Call (587) 731-0695 for help.`, 'error'); }
     finally { pending = false; resetWidget('estimate'); $('sendEstimate').textContent = 'Send to MFTNB'; $('sendEstimate').removeAttribute('aria-busy'); render(); }
@@ -367,5 +450,11 @@ function initializePage() {
   if ($('currentYear')) $('currentYear').textContent = new Date().getFullYear();
   window.onloadTurnstileCallback = initializeVerification;
   document.querySelector('script[src*="turnstile/v0/api.js"]')?.addEventListener('load', initializeVerification);
+  const header = document.querySelector('.site-header');
+  if (header) {
+    const clearance = () => document.documentElement.style.setProperty('--estimator-header-clearance', `${Math.ceil(header.getBoundingClientRect().height + 16)}px`);
+    clearance();
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(clearance).observe(header);
+  }
   render(); initializeVerification();
 }

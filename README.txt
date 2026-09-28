@@ -1,6 +1,6 @@
 MFTNB — Production Site
 
-This is a ready-to-host static website for Moving Forward to New Beginnings with a chat-style estimator and a backend that stores submissions to Google Sheets (no API keys in the browser).
+This is a ready-to-host static website for Moving Forward to New Beginnings with a chat-style estimator and a backend that stores submissions to Google Sheets (no server secrets in the browser).
 
 Deploy the frontend (free)
 
@@ -28,5 +28,10 @@ Cloudflare Turnstile configuration
 - Rotate keys in the Cloudflare dashboard as needed; only update Script Properties and the site key constant—no repository changes are required when swapping secrets.
 
 Privacy & anti-spam
-- No secrets or keys in the frontend. Apps Script runs server-side in your Google account.
+- No server secrets in the frontend. An optional Google Maps browser key must be restricted to this site and the required APIs. Apps Script runs server-side in your Google account.
 - Hidden honeypot field to block bots. Add reCAPTCHA v3 later if needed.
+
+Address confirmation and Google Maps travel
+- See docs/MAPS-SETUP.md for the activation checklist and staff calculation contract.
+- maps-config.js deliberately starts without a browser key and with an unconfirmed shop pin. Manual address confirmation and staff review remain available.
+- Cloudflare Pages is the current GitHub-connected host; this feature uses the same repository and delivery endpoint.

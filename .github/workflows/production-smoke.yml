@@ -4,7 +4,7 @@ on:
     branches: [main]
     paths:
       - 'index.html'
-      - 'script.js'
+      - '*.js'
       - '*.css'
       - '.github/workflows/production-smoke.yml'
   workflow_dispatch:
@@ -38,7 +38,7 @@ jobs:
           version = version_match.group(1)
           expected = {
               name: hashlib.sha256(Path(name).read_bytes()).hexdigest()
-              for name in ('script.js', 'styles.css', 'estimator.css')
+              for name in ('script.js', 'travel.js', 'maps-config.js', 'styles.css', 'estimator.css')
           }
           run_id = os.environ['GITHUB_RUN_ID']
           commit = os.environ['GITHUB_SHA']
@@ -48,6 +48,9 @@ jobs:
               'Confirmed after review',
               f'script.js?v={version}',
               'estimator.css',
+              'travel.js',
+              'maps-config.js',
+              'travelSummary',
           )
           last_error = ''
 
@@ -90,7 +93,7 @@ jobs:
                       'PASS: https://mftnb.com serves the reviewed-estimate release.',
                       f'Release version: {version}',
                       f'Repository commit checked: {commit}',
-                      'Homepage: HTTP 200; all five release markers present.',
+                      'Homepage: HTTP 200; all release markers present.',
                       *verified,
                       'Only public GET requests were made. No forms, customer leads, email or Sheets submissions were sent.',
                       'This check verifies deployed files, not production submission delivery or visual layout.',
