@@ -13,3 +13,32 @@
   .chat-log { scroll-behavior: auto; }
   .progress-bar span { transition: none; }
 }
+/* Address checks and travel use the existing navy, sky and gold palette. */
+.address-control { display: grid; gap: 0.85rem; min-width: 0; }
+.address-manual { display: grid; gap: 0.85rem; }
+.address-control [hidden] { display: none !important; }
+.address-field { display: grid; gap: 0.35rem; font-weight: 600; color: var(--brand-navy); }
+.address-search, .address-search gmp-place-autocomplete { display: block; width: 100%; min-width: 0; }
+.address-note { font-size: 0.9rem; color: var(--text-muted); margin: 0; }
+.address-card:empty { display: none; }
+.address-card { background: var(--brand-sky-light); padding: 1rem; border: 1px solid #bdd3f3; border-radius: var(--radius-md); overflow-wrap: anywhere; }
+.address-municipality { display: block; font-size: 1.25rem; color: var(--brand-navy); }
+.address-full, .address-unit { margin: 0.3rem 0; }
+.address-map-link { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
+.address-map { display: block; width: 100%; height: 230px; border: 0; border-radius: var(--radius-sm); margin-top: 0.5rem; background: white; }
+.address-confirm { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.8rem; border-radius: var(--radius-sm); background: #fff7e5; cursor: pointer; min-height: 44px; }
+.address-confirm input { width: 22px; height: 22px; flex-shrink: 0; margin-top: 0.2rem; accent-color: var(--brand-navy); }
+.travel-summary { background: linear-gradient(145deg, var(--brand-sky-light), #fff); border: 1px solid #bdd3f3; border-top: 4px solid var(--brand-gold); border-radius: var(--radius-md); padding: 1.1rem; margin: 1rem 0; overflow-wrap: anywhere; }
+.travel-title { color: var(--brand-navy); font-size: 1.1rem; margin: 0 0 0.7rem; }
+.travel-status { font-weight: 600; color: var(--brand-navy); }
+.travel-legs { margin: 0; padding-left: 1.25rem; }
+.travel-legs li { padding: 0.4rem 0; }
+.travel-legs strong { display: block; color: var(--brand-navy); }
+.travel-total { font-weight: 700; padding-top: 0.7rem; border-top: 1px solid #bdd3f3; }
+.travel-route { font-size: 0.9rem; font-weight: 600; }
+
+#promptText, .address-field, .address-confirm { scroll-margin-top: var(--estimator-header-clearance, 180px); }
+@media (max-width: 720px) {
+  /* A map plus address fields is taller than the keyboard viewport; let it scroll normally. */
+  .chat-composer[data-question-type="address"] { position: static; }
+}
