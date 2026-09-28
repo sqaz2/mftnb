@@ -7,7 +7,6 @@ from pathlib import Path
 import json
 import os
 import re
-import shutil
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -56,7 +55,7 @@ results=[]
 with sync_playwright() as p:
     @contextmanager
     def page_case(seed=None, configured=False, confirmed=False, route_mode='normal', width=390, seed_pins=False):
-        browser=p.chromium.launch(executable_path=os.environ.get('MFTNB_CHROMIUM_EXECUTABLE') or shutil.which('chromium') or None,headless=True,args=['--no-sandbox','--disable-dev-shm-usage','--disable-gpu','--single-process'])
+        browser=p.chromium.launch(executable_path=os.environ.get('MFTNB_CHROMIUM_EXECUTABLE') or None,headless=True,args=['--no-sandbox','--disable-dev-shm-usage'] + (['--disable-gpu','--single-process'] if os.environ.get('MFTNB_CHROMIUM_EXECUTABLE') else []))
         ctx=browser.new_context(viewport={'width':width,'height':844},accept_downloads=True,is_mobile=width<768,has_touch=width<768)
         ctx.route('**/*',lambda route:route.fulfill(status=200,content_type='text/html',body='<p>Map preview mocked for test</p>') if '/maps/embed/' in route.request.url else route.abort())
         page=ctx.new_page();page.set_default_timeout(5000);errors=[];page.on('pageerror',lambda err:errors.append(str(err)))

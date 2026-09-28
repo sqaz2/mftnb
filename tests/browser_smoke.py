@@ -7,7 +7,6 @@ from pathlib import Path
 import json
 import os
 import re
-import shutil
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,9 +23,9 @@ results=[]
 with sync_playwright() as p:
     @contextmanager
     def page_case(seed=None, response='{"ok":true}', legacy=None):
-        browser=p.chromium.launch(executable_path=os.environ.get('MFTNB_CHROMIUM_EXECUTABLE') or shutil.which('chromium') or None, headless=True, args=['--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--single-process'])
+        browser=p.chromium.launch(executable_path=os.environ.get('MFTNB_CHROMIUM_EXECUTABLE') or None, headless=True, args=['--no-sandbox', '--disable-dev-shm-usage'] + (['--disable-gpu', '--single-process'] if os.environ.get('MFTNB_CHROMIUM_EXECUTABLE') else []))
         ctx=browser.new_context(viewport={'width':360,'height':800}, accept_downloads=True)
-        page=ctx.new_page(); errors=[]
+        page=ctx.new_page(); page.set_default_timeout(10000); errors=[]
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.set_content(HTML)
         page.evaluate("""({seed,legacy,response})=>{
@@ -55,7 +54,7 @@ with sync_playwright() as p:
             yield page,Posts()
             assert not errors, errors
         finally: ctx.close(); browser.close()
-    def passed(name): results.append(name); print('PASS',name)
+    def passed(name): results.append(name); print('PASS',name,flush=True)
 
     with page_case() as (page,posts):
         assert page.locator('#input-moveType').count()==1
@@ -66,7 +65,8 @@ with sync_playwright() as p:
     passed('empty form: no numeric estimate, no forced page focus, no unsolicited submit')
 
     with page_case() as (page,posts):
-        while page.locator('#inputHolder [name]').count() or page.locator('#inputHolder input[type=checkbox]').count():
+        for step in range(60):
+            if not (page.locator('#inputHolder [name]').count() or page.locator('#inputHolder input[type=checkbox]').count()): break
             control=page.locator('#inputHolder [name]').first
             if control.count():
                 name=control.get_attribute('name'); value=FIXTURE[name]
@@ -81,6 +81,7 @@ with sync_playwright() as p:
             else:
                 page.get_by_label('Furniture assembly / disassembly', exact=True).check()
             page.locator('#chatSubmit').click()
+        else: raise AssertionError('Guided flow did not finish: '+page.locator('#inputError').inner_text())
         assert page.locator('#progressText').inner_text()=='Ready to review and send'
         assert '140' in page.locator('#cheatSheetText').inner_text()
         assert '4 movers' not in page.locator('#cheatSheetText').inner_text()
