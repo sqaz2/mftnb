@@ -1,9 +1,9 @@
 'use strict';
 
 // Public estimate requests are not calibrated price estimates. See docs/ESTIMATOR-AUDIT.md.
-const ESTIMATOR_VERSION = '2026-09-29-estimate-receipt';
+const ESTIMATOR_VERSION = '2026-09-29-owner-connected';
 const Travel = typeof module !== 'undefined' && module.exports ? require('./travel.js') : window.MFTNBTravel;
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2kTp_RynPKZptrLJrsv_DvS_-el2bzBz8Jc_QaEej2nHop5iABnMcuEa5pff2No9W8g/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzTLqrI8qNqeSEqQ7pfmK-FCOqMx3_GwRs9AIE9XatK6m3FIoYYJJuJjobi1PcHGMCgfA/exec';
 const TURNSTILE_SITE_KEY = '0x4AAAAAAB2kYqJ0EOGNbli7';
 const STORAGE_KEY = 'mftnb-estimate-v4';
 const LEGACY_STORAGE_KEY = 'mftnb-estimate-v3';
