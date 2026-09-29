@@ -27,6 +27,7 @@ function backend({ failTo = [], failWrite = false, verified = true, properties =
   sendRaw, sendThrows = false, headers = legacyHeaders } = {}) {
   const events = [], rows = [], emails = [], errors = [], requests = [], sheetNames = [];
   const header = [...headers];
+  const savedProperties = new Map(Object.entries({ TURNSTILE_SECRET: 'test-secret', ...properties }));
   const sheet = {
     appendRow(row) {
       if (failWrite) throw new Error('Sheet unavailable');
@@ -41,10 +42,11 @@ function backend({ failTo = [], failWrite = false, verified = true, properties =
       };
     }
   };
+  const spreadsheet = { getId: () => 'synthetic-email-sheet', getSheetByName: name => { sheetNames.push(name); return sheet; } };
   const context = vm.createContext({
     LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
-    PropertiesService: { getScriptProperties: () => ({ getProperty: key => ({ TURNSTILE_SECRET: 'test-secret', ...properties })[key] || null }) },
-    SpreadsheetApp: { flush() {}, getActiveSpreadsheet: () => ({ getSheetByName: name => { sheetNames.push(name); return sheet; } }) },
+    PropertiesService: { getScriptProperties: () => ({ getProperty: key => savedProperties.get(key) || null, setProperty: (key, value) => savedProperties.set(key, value) }) },
+    SpreadsheetApp: { flush() {}, getActiveSpreadsheet: () => spreadsheet, openById(id) { assert.equal(id, 'synthetic-email-sheet'); return spreadsheet; } },
     MailApp: { sendEmail(email) {
       events.push('email:' + email.to);
       if (failTo.includes(email.to)) throw new Error('Mail unavailable');

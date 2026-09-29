@@ -392,7 +392,14 @@ function buildCustomerEstimateText(body, timestamp) {
 }
 
 function getOrCreateSheet(name) {
-  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  // The bound Sheet is available in the editor/trigger, but not in web-app requests.
+  // Remember it during setup, then open that same Sheet explicitly for website calls.
+  const id = SCRIPT_PROPERTIES.getProperty('MFTNB_SPREADSHEET_ID');
+  const spreadsheet = id ? SpreadsheetApp.openById(id) : SpreadsheetApp.getActiveSpreadsheet();
+  if (!spreadsheet) {
+    throw new Error('Run enableOwnerNotifications from the bound Sheet editor to connect the spreadsheet.');
+  }
+  if (!id) SCRIPT_PROPERTIES.setProperty('MFTNB_SPREADSHEET_ID', spreadsheet.getId());
   let sheet = spreadsheet.getSheetByName(name);
   if (!sheet) {
     sheet = spreadsheet.insertSheet(name);
