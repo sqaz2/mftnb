@@ -23,11 +23,12 @@ function harness(){
   const sheets=new Map(), mails=[], pushes=[], triggers=[];
   const sourceSheet = new Sheet(); sourceSheet.appendRow(legacyHeaders); sheets.set('Sheet1', sourceSheet);
   let locked=false;
-  const state={sendCodeStatus:200,pushStatus:201,mailFails:false,verification:{success:true,hostname:'mftnb.com',action:'owner_login'}};
+  const state={activeSpreadsheetAvailable:true,sendCodeStatus:200,pushStatus:201,mailFails:false,verification:{success:true,hostname:'mftnb.com',action:'owner_login'}};
+  const spreadsheet={getId:()=> 'synthetic-mftnb-sheet',getSheetByName:n=>sheets.get(n)||null,insertSheet:n=>{const s=new Sheet;sheets.set(n,s);return s;},getRangeByName:()=>null};
   const ctx={console:{error(){},warn(){},log(){}},Uint8Array,Uint32Array,BigInt,DataView,ArrayBuffer,Date,
     PropertiesService:{getScriptProperties:()=>props},
     LockService:{getScriptLock:()=>({waitLock(){assert.equal(locked,false,'lock must not be nested');locked=true;},releaseLock(){locked=false;}})},
-    SpreadsheetApp:{flush(){},getActiveSpreadsheet:()=>({getSheetByName:n=>sheets.get(n)||null,insertSheet:n=>{const s=new Sheet;sheets.set(n,s);return s;},getRangeByName:()=>null})},
+    SpreadsheetApp:{flush(){},getActiveSpreadsheet:()=>state.activeSpreadsheetAvailable?spreadsheet:null,openById(id){assert.equal(id,'synthetic-mftnb-sheet');return spreadsheet;}},
     ScriptApp:{getProjectTriggers:()=>triggers,newTrigger:name=>({timeBased(){return this;},everyMinutes(){return this;},create(){triggers.push({getHandlerFunction:()=>name});}}),deleteTrigger:t=>triggers.splice(triggers.indexOf(t),1)},
     Utilities:{getUuid:()=>crypto.randomUUID(),newBlob:value=>({getBytes:()=>Array.from(Buffer.from(value))}),base64EncodeWebSafe:bytes=>Buffer.from(bytes).toString('base64url'),base64DecodeWebSafe:value=>Array.from(Buffer.from(value,'base64url')),computeDigest:(_,value)=>Array.from(crypto.createHash('sha256').update(value).digest()),computeHmacSha256Signature:(data,key)=>Array.from(crypto.createHmac('sha256',key).update(data).digest()),DigestAlgorithm:{SHA_256:'SHA256'},Charset:{UTF_8:'UTF8'}},
     MailApp:{sendEmail:mail=>{if(state.mailFails)throw new Error('mail unavailable');mails.push(mail);}},
@@ -56,6 +57,27 @@ function harness(){
 }
 test('owner API remains unavailable until explicit private owner setup',()=>{const h=harness();assert.equal(h.request({action:'owner.inbox'}).setupRequired,true);assert.throws(()=>h.ctx.enableOwnerNotifications(),/verified owner email/);assert.equal(h.mails.length,0);});
 test('owner setup adds one retry trigger and never sends email',()=>{const h=harness();h.enable();h.enable();assert.equal(h.triggers.length,1);assert.equal(h.mails.length,0);assert.equal(h.sheets.get('Owner Inbox').rows.length,1);});
+test('web-app submissions and owner inbox work without an active spreadsheet after setup',()=>{
+  const h=harness();h.enable();
+  assert.equal(h.properties.get('MFTNB_SPREADSHEET_ID'),'synthetic-mftnb-sheet');
+  h.state.activeSpreadsheetAvailable=false;
+  const token=h.login();
+  h.state.verification.action='estimate';
+  assert.equal(h.request({formType:'estimate',turnstileToken:'test',name:'Web customer',email:'test@example.test',phone:'5555555555',pickup:'A',dropoff:'B'}).ok,true);
+  h.state.verification.action='quick_message';
+  assert.equal(h.request({formType:'quick-message',turnstileToken:'test',name:'Web contact',message:'Please call'}).ok,true);
+  const inbox=h.request({action:'owner.inbox',token});
+  assert.equal(inbox.ok,true);assert.equal(inbox.leads.length,2);
+  assert.equal(h.request({action:'owner.status',token,id:inbox.leads[0].id,status:'contacted'}).ok,true);
+  assert.equal(h.sheets.get('Sheet1').rows.length,2);
+  assert.equal(h.sheets.get('Quick Messages').rows.length,1);
+});
+test('an unconfigured web-app request fails before a write or email',()=>{
+  const h=harness();h.state.activeSpreadsheetAvailable=false;h.state.verification.action='estimate';
+  const result=h.request({formType:'estimate',turnstileToken:'test',name:'Web customer',email:'test@example.test',phone:'5555555555',pickup:'A',dropoff:'B'});
+  assert.equal(result.ok,false);assert.match(result.error,/connect the spreadsheet/);
+  assert.equal(h.sheets.get('Sheet1').rows.length,1);assert.equal(h.mails.length,0);assert.equal(h.triggers.length,0);
+});
 test('anonymous callers cannot read leads, change statuses, set keys or subscribe',()=>{const h=harness();h.enable();for(const action of ['inbox','keys','subscribe','status','test','logout'])assert.equal(h.request({action:'owner.'+action}).error,'Please sign in again.');});
 test('only the private owner address gets a code; wrong host/action checks fail closed',()=>{const h=harness();h.enable();h.request({action:'owner.code',email:'customer@example.test',turnstileToken:'test'});assert.equal(h.mails.length,0);h.state.verification.action='estimate';assert.equal(h.request({action:'owner.code',email:ownerEmail,turnstileToken:'test'}).ok,false);h.state.verification.action='owner_login';h.state.verification.hostname='attacker.example';assert.equal(h.request({action:'owner.code',email:ownerEmail,turnstileToken:'test'}).ok,false);assert.equal(h.mails.length,0);});
 test('a code is single use, sessions store hashes and email changes revoke access',()=>{const h=harness();h.enable();const token=h.login();const saved=h.properties.get('MFTNB_OWNER_SESSIONS');assert.equal(saved.includes(token),false);assert.equal(h.request({action:'owner.inbox',token}).ok,true);assert.equal(h.request({action:'owner.verify',code:h.mails.at(-1).body.match(/\b\d{8}\b/)[0],newToken:token}).ok,false);h.props.setProperty('MFTNB_OWNER_EMAIL','replacement@example.test');assert.equal(h.request({action:'owner.inbox',token}).ok,false);});
