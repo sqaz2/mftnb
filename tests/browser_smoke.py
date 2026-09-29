@@ -131,7 +131,29 @@ with sync_playwright() as p:
         assert len(posts)==1
         assert page.evaluate("sessionStorage.getItem('mftnb-estimate-v4')")=='{}'
         assert 'no price or booking is confirmed' in page.locator('#estimateStatus').inner_text()
+        assert 'within 24 hours' in page.locator('#estimateStatus').inner_text()
+        assert 'call Chris at (587) 731-0695' in page.locator('#estimateStatus').inner_text()
+        assert 'email' not in page.locator('#estimateStatus').inner_text()
     passed('expired tokens block send; duplicate clicks send once; only affirmative acknowledgement clears draft')
+
+    with page_case(FIXTURE,response='{"ok":true,"row":1,"confirmationEmailSent":true}') as (page,posts):
+        page.locator('#consent').check(); page.locator('#sendEstimate').click()
+        page.wait_for_function("document.querySelector('#estimateStatus').classList.contains('success')")
+        assert len(posts)==1
+        assert 'A confirmation email has been sent.' in page.locator('#estimateStatus').inner_text()
+        assert 'within 24 hours' in page.locator('#estimateStatus').inner_text()
+        assert 'call Chris at (587) 731-0695' in page.locator('#estimateStatus').inner_text()
+    passed('customer receipt accepted: confirmation email, 24-hour reply expectation, and Chris contact shown')
+
+    with page_case(FIXTURE,response='{"ok":true,"row":1,"confirmationEmailSent":false}') as (page,posts):
+        page.locator('#consent').check(); page.locator('#sendEstimate').click()
+        page.wait_for_function("document.querySelector('#estimateStatus').classList.contains('success')")
+        assert len(posts)==1
+        assert 'could not send your confirmation email' in page.locator('#estimateStatus').inner_text()
+        assert 'do not need to submit again' in page.locator('#estimateStatus').inner_text()
+        assert 'within 24 hours' in page.locator('#estimateStatus').inner_text()
+        assert page.evaluate("sessionStorage.getItem('mftnb-estimate-v4')")=='{}'
+    passed('email failure keeps the saved request successful and explains no repeat submission is needed')
 
     with page_case(legacy={**FIXTURE,'fragileItems':145}) as (page,posts):
         assert page.locator('#input-moveType').count()==0  # fixture supplied a valid scope, unlike old real drafts
