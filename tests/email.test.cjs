@@ -15,6 +15,8 @@ const estimate = {
   notes: 'Pickup: Red Deer, unit 2\nDestination: Blackfalds, unit 3\ntravel estimate unavailable—staff review required'
 };
 
+const legacyHeaders = ['submittedAt', 'name', 'email', 'phone', 'pickup', 'dropoff', 'moveDate', 'timeWindow', 'homeSize', 'access', 'inventory', 'extras', 'notes', 'source'];
+
 const cloudflareProperties = {
   MFTNB_CUSTOMER_EMAIL_PROVIDER: 'cloudflare',
   CLOUDFLARE_ACCOUNT_ID: 'a'.repeat(32),
@@ -22,19 +24,27 @@ const cloudflareProperties = {
 };
 function backend({ failTo = [], failWrite = false, verified = true, properties = {},
   sendStatus = 200, sendResponse = { success: true, result: { delivered: [estimate.email] } },
-  sendRaw, sendThrows = false } = {}) {
-  const events = [], rows = [], emails = [], errors = [], requests = [];
+  sendRaw, sendThrows = false, headers = legacyHeaders } = {}) {
+  const events = [], rows = [], emails = [], errors = [], requests = [], sheetNames = [];
+  const header = [...headers];
   const sheet = {
     appendRow(row) {
       if (failWrite) throw new Error('Sheet unavailable');
       rows.push(row); events.push('saved');
     },
-    getLastRow() { return rows.length; }
+    getLastRow() { return rows.length + 1; },
+    getRange(r, c, h, w) {
+      assert.equal(r, 1); assert.equal(h, 1);
+      return {
+        getValues: () => [Array.from({ length: w }, (_, i) => header[c - 1 + i] ?? '')],
+        setValues(values) { header.splice(c - 1, w, ...values[0]); }
+      };
+    }
   };
   const context = vm.createContext({
     LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
     PropertiesService: { getScriptProperties: () => ({ getProperty: key => ({ TURNSTILE_SECRET: 'test-secret', ...properties })[key] || null }) },
-    SpreadsheetApp: { flush() {}, getActiveSpreadsheet: () => ({ getSheetByName: () => sheet }) },
+    SpreadsheetApp: { flush() {}, getActiveSpreadsheet: () => ({ getSheetByName: name => { sheetNames.push(name); return sheet; } }) },
     MailApp: { sendEmail(email) {
       events.push('email:' + email.to);
       if (failTo.includes(email.to)) throw new Error('Mail unavailable');
@@ -56,15 +66,15 @@ function backend({ failTo = [], failWrite = false, verified = true, properties =
   });
   vm.runInContext(source, context, { filename: 'apps_script.gs' });
   const submit = (body = estimate) => JSON.parse(context.doPost({ postData: { contents: JSON.stringify(body) } }).text);
-  return { context, submit, events, rows, emails, errors, requests };
+  return { context, submit, events, rows, emails, errors, requests, header, sheetNames };
 }
 
 test('saved estimate sends the requested HTML and plain-text receipt to the customer', () => {
   const b = backend();
-  assert.deepEqual(b.submit(), { ok: true, row: 1, confirmationEmailSent: true });
+  assert.deepEqual(b.submit(), { ok: true, row: 2, confirmationEmailSent: true });
   assert.deepEqual(b.events, ['saved', 'email:info@mftnb.ca', 'email:customer@example.com']);
   assert.equal(b.rows.length, 1);
-  assert.equal(b.rows[0][13], estimate.notes);
+  assert.equal(b.rows[0][12], estimate.notes);
   const email = b.emails[1];
   assert.equal(email.subject, 'We received your estimate request – Moving Forward to New Beginnings');
   assert.equal(email.name, 'Moving Forward to New Beginnings');
@@ -100,7 +110,7 @@ test('an office notification failure still attempts the customer receipt', () =>
 
 test('a customer email failure preserves the saved request and reports the failed send', () => {
   const b = backend({ failTo: [estimate.email] });
-  assert.deepEqual(b.submit(), { ok: true, row: 1, confirmationEmailSent: false });
+  assert.deepEqual(b.submit(), { ok: true, row: 2, confirmationEmailSent: false });
   assert.equal(b.rows.length, 1);
   assert.equal(b.emails.length, 1);
   assert.equal(b.emails[0].to, 'info@mftnb.ca');
@@ -109,7 +119,7 @@ test('a customer email failure preserves the saved request and reports the faile
 
 test('failure of both emails does not turn a saved request into a retryable submission failure', () => {
   const b = backend({ failTo: ['info@mftnb.ca', estimate.email] });
-  assert.deepEqual(b.submit(), { ok: true, row: 1, confirmationEmailSent: false });
+  assert.deepEqual(b.submit(), { ok: true, row: 2, confirmationEmailSent: false });
   assert.equal(b.rows.length, 1);
   assert.equal(b.emails.length, 0);
 });
@@ -138,14 +148,14 @@ test('failed human verification sends no receipt and writes no lead', () => {
 test('public health response verifies the backend release without sending email', () => {
   const b = backend();
   assert.deepEqual(JSON.parse(b.context.doGet().text), {
-    ok: true, service: 'mftnb-apps-script', version: '2026-09-29-cloudflare-email'
+    ok: true, service: 'mftnb-apps-script', version: '2026-09-29-cloudflare-email-sheet1'
   });
   assert.equal(b.events.length, 0);
 });
 
 test('Cloudflare sends the saved estimate from noreply and preserves office delivery', () => {
   const b = backend({ properties: cloudflareProperties });
-  assert.deepEqual(b.submit(), { ok: true, row: 1, confirmationEmailSent: true });
+  assert.deepEqual(b.submit(), { ok: true, row: 2, confirmationEmailSent: true });
   assert.deepEqual(b.events, ['saved', 'email:info@mftnb.ca', 'cloudflare']);
   assert.equal(b.emails.length, 1);
   const request = b.requests[0];
@@ -187,7 +197,7 @@ for (const [label, overrides] of [
 ]) {
   test('Cloudflare ' + label + ' preserves the saved lead without a fallback send', () => {
     const b = backend({ properties: cloudflareProperties, ...overrides });
-    assert.deepEqual(b.submit(), { ok: true, row: 1, confirmationEmailSent: false });
+    assert.deepEqual(b.submit(), { ok: true, row: 2, confirmationEmailSent: false });
     assert.equal(b.rows.length, 1);
     assert.equal(b.requests.length, 1);
     assert.deepEqual(b.emails.map(email => email.to), ['info@mftnb.ca']);
@@ -237,4 +247,34 @@ test('quick message confirmations use the same noreply sender and contact instru
   assert.match(email.text, /within 24 hours/);
   assert.match(email.text, /call Chris at \(587\) 731-0695/);
   assert.doesNotMatch(email.html, /<script/);
+});
+
+
+test('new receipts preserve the live Sheet1 columns and append only new trailing fields', () => {
+  const b = backend();
+  const body = { ...estimate, timeWindow: 'Morning', source: 'Estimator' };
+  assert.equal(b.submit(body).ok, true);
+  assert.deepEqual(b.sheetNames, ['Sheet1']);
+  assert.deepEqual(b.header, [...legacyHeaders, 'bedrooms', 'consent']);
+  assert.deepEqual(Array.from(b.rows[0].slice(1)), [
+    body.name, body.email, body.phone, body.pickup, body.dropoff, body.moveDate,
+    body.timeWindow, body.homeType, body.access, body.inventory, 'Packing',
+    body.notes, body.source, body.bedrooms, 'Yes'
+  ]);
+});
+
+test('a changed source layout cannot silently mix customer columns or send a receipt', () => {
+  for (const headers of [
+    legacyHeaders.map(name => name === 'access' ? 'bedrooms' : name),
+    [...legacyHeaders, 'Private office notes']
+  ]) {
+    const b = backend({ headers });
+    const result = b.submit();
+    assert.equal(result.ok, false);
+    assert.match(result.error, /sheet columns have changed/);
+    assert.equal(b.rows.length, 0);
+    assert.equal(b.emails.length, 0);
+    assert.equal(b.requests.length, 0);
+    assert.deepEqual(b.header, headers);
+  }
 });
