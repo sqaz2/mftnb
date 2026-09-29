@@ -17,6 +17,7 @@ jobs:
       - run: npm run build:push && git diff --exit-code apps_script.gs backend/THIRD-PARTY-LICENSES.txt
       - run: node --check owner/owner.js && node --check owner/sw.js
       - run: node --check maps-config.js && node --check travel.js && node --check script.js
+      - run: node --check email-worker/worker.mjs && node --check email-worker/auto-reply.mjs
       - run: node --test tests/*.test.cjs
   browser-tests:
     runs-on: ubuntu-latest

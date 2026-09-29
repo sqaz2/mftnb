@@ -6,7 +6,7 @@ const E = require('../script.js');
 const read = name => fs.readFileSync(path.join(__dirname, '..', name), 'utf8');
 const disallowed = /\bquot(?:e[ds]?|ing|ations?)\b/i;
 
-for (const name of ['index.html', 'script.js', 'privacy.html', 'apps_script.gs', 'README.txt', 'docs/ESTIMATOR-AUDIT.md', 'travel.js', 'maps-config.js', 'docs/MAPS-SETUP.md', 'docs/ESTIMATE-EMAIL.md']) {
+for (const name of ['index.html', 'script.js', 'privacy.html', 'apps_script.gs', 'README.txt', 'docs/ESTIMATOR-AUDIT.md', 'travel.js', 'maps-config.js', 'docs/MAPS-SETUP.md', 'docs/ESTIMATE-EMAIL.md', 'email-worker/auto-reply.mjs']) {
   test(`MFTNB pricing terminology stays estimate-only: ${name}`, () => {
     assert.doesNotMatch(read(name), disallowed);
   });
