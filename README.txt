@@ -22,8 +22,9 @@ Set up the backend (Google Apps Script → Google Sheets)
 6) Use a controlled test submission to verify the Sheet row, office notification, and customer receipt. See docs/ESTIMATE-EMAIL.md for updating the existing deployment and checking email delivery.
 
 Estimate receipt emails
-- The existing Apps Script sends a customer receipt after saving the estimate request to the Leads sheet.
-- The receipt says the request was received, a reply is expected within 24 hours, and questions can go to Chris at (587) 731-0695. Replies go to info@mftnb.ca.
+- The existing Apps Script sends a customer receipt after saving the request. Reconcile the live Sheet1 schema before updating the backend; see docs/ESTIMATE-EMAIL.md.
+- The receipt says the request was received, a response is expected within 24 hours, and questions or changes should go to Chris at (587) 731-0695.
+- Cloudflare configuration enables noreply@mftnb.com for customer confirmations. The email-worker handler responds to incoming replies with an unmonitored-inbox notice and Chris's number. Domain verification, permissions, routing and backend activation are still required.
 - Updating GitHub or Cloudflare does not deploy apps_script.gs. Update the existing Apps Script web app version using docs/ESTIMATE-EMAIL.md.
 
 Cloudflare Turnstile configuration

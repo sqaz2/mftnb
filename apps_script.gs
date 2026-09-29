@@ -8,7 +8,7 @@ const QUICK_SHEET_NAME = 'Quick Messages';
 const OFFICE_EMAIL = 'info@mftnb.ca';
 const CUSTOMER_SUBJECT = 'We received your message – Moving Forward to New Beginnings';
 const ESTIMATE_CUSTOMER_SUBJECT = 'We received your estimate request – Moving Forward to New Beginnings';
-const BACKEND_VERSION = '2026-09-29-estimate-receipt';
+const BACKEND_VERSION = '2026-09-29-cloudflare-email';
 const SCRIPT_PROPERTIES = PropertiesService.getScriptProperties();
 const TURNSTILE_SECRET_PROPERTY = 'TURNSTILE_SECRET';
 // Optional: populate TURNSTILE_SECRET_FALLBACK for temporary testing only. Prefer Script Properties.
@@ -145,15 +145,13 @@ function handleEstimateSubmission(body) {
   let confirmationEmailSent = false;
   if (body.email) {
     try {
-      MailApp.sendEmail({
+      sendCustomerEmail_({
         to: body.email,
         subject: ESTIMATE_CUSTOMER_SUBJECT,
         body: buildCustomerEstimateText(body, timestamp),
-        htmlBody: buildCustomerEstimateHtml(body, timestamp),
-        name: 'Moving Forward to New Beginnings',
-        replyTo: OFFICE_EMAIL
+        htmlBody: buildCustomerEstimateHtml(body, timestamp)
       });
-      // MailApp accepted the send; this does not guarantee delivery to the inbox.
+      // The provider accepted the send; this does not guarantee delivery to the inbox.
       confirmationEmailSent = true;
     } catch (err) {
       console.error('Unable to send customer confirmation', err);
@@ -212,18 +210,26 @@ function handleQuickMessageSubmission(body) {
   if (body.email) {
     const customerBodyLines = [
       '<p>Hi ' + sanitize(body.name) + ',</p>',
-      '<p>Thanks for getting in touch with Moving Forward to New Beginnings. We received your note and will reply shortly.</p>',
+      '<p>Thanks for getting in touch with Moving Forward to New Beginnings. We received your message. You can expect to hear back from our team within 24 hours.</p>',
       '<p><strong>Your message:</strong><br />' + sanitizedMessage + '</p>',
-      '<p>If anything changes, call or text us at <a href="tel:+15877310695">(587) 731-0695</a>.</p>',
+      '<p>If you have any questions or your details change, call Chris at <a href="tel:+15877310695">(587) 731-0695</a>.</p>',
+      '<p>This is an automated confirmation. Please call Chris for help.</p>',
       '<p>— Chris Ehret &amp; the MFTNB team</p>'
     ];
     const customerBody = customerBodyLines.join('\n');
     try {
-      MailApp.sendEmail({
+      sendCustomerEmail_({
         to: body.email,
         subject: CUSTOMER_SUBJECT,
         htmlBody: customerBody,
-        replyTo: OFFICE_EMAIL
+        body: [
+          'Hi ' + body.name + ',', '',
+          'Thanks for getting in touch with Moving Forward to New Beginnings. We received your message. You can expect to hear back from our team within 24 hours.', '',
+          'Your message:', String(body.message), '',
+          'If you have any questions or your details change, call Chris at (587) 731-0695.', '',
+          'This is an automated confirmation. Please call Chris for help.', '',
+          'Chris Ehret & the MFTNB team'
+        ].join('\n')
       });
     } catch (err) {
       console.error('Unable to send quick message confirmation', err);
@@ -347,7 +353,8 @@ function buildCustomerEstimateHtml(body, timestamp) {
   lines.push('<p>Hi ' + sanitize(body.name) + ',</p>');
   lines.push('<p>Thank you for contacting Moving Forward to New Beginnings. We received your estimate request on <strong>' + sanitize(timestamp.toLocaleString()) + '</strong>.</p>');
   lines.push('<p>You can expect to hear back from our team <strong>within 24 hours</strong>.</p>');
-  lines.push('<p>If you have any questions, call Chris at <a href="tel:+15877310695">(587) 731-0695</a>. You can also reply to this email if your details change.</p>');
+  lines.push('<p>If you have any questions or your details change, call Chris at <a href="tel:+15877310695">(587) 731-0695</a>.</p>');
+  lines.push('<p>This is an automated confirmation. Please call Chris for help.</p>');
   lines.push('<p>This email confirms we received your estimate request. Your moving details are awaiting staff review; no price or booking is confirmed yet.</p>');
   lines.push('<h3>Your summary</h3>');
   lines.push('<ul>');
@@ -367,7 +374,9 @@ function buildCustomerEstimateText(body, timestamp) {
     '',
     'You can expect to hear back from our team within 24 hours.',
     '',
-    'If you have any questions, call Chris at (587) 731-0695. You can also reply to this email if your details change.',
+    'If you have any questions or your details change, call Chris at (587) 731-0695.',
+    '',
+    'This is an automated confirmation. Please call Chris for help.',
     '',
     'This email confirms we received your estimate request. Your moving details are awaiting staff review; no price or booking is confirmed yet.',
     '',
@@ -416,6 +425,69 @@ function respond(obj, code) {
     output.setResponseCode(code);
   }
   return output;
+}
+
+// Customer confirmations only. Office mail and owner sign-in keep their existing sender.
+// Enable Cloudflare only after the sending domain and inbound automatic reply are live.
+function sendCustomerEmail_(email) {
+  const recipient = typeof email.to === 'string' ? email.to.trim() : '';
+  if (!/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,63}$/i.test(recipient) || recipient.length > 254) {
+    throw new Error('Invalid customer email recipient');
+  }
+  const provider = (SCRIPT_PROPERTIES.getProperty('MFTNB_CUSTOMER_EMAIL_PROVIDER') || '').trim().toLowerCase();
+  if (!provider || provider === 'google') {
+    MailApp.sendEmail({
+      to: recipient, subject: email.subject, body: email.body, htmlBody: email.htmlBody,
+      name: 'Moving Forward to New Beginnings', replyTo: OFFICE_EMAIL
+    });
+    return;
+  }
+  if (provider !== 'cloudflare') throw new Error('Unsupported customer email provider');
+
+  const accountId = (SCRIPT_PROPERTIES.getProperty('CLOUDFLARE_ACCOUNT_ID') || '').trim();
+  const token = (SCRIPT_PROPERTIES.getProperty('CLOUDFLARE_EMAIL_API_TOKEN') || '').trim();
+  if (!/^[a-f0-9]{32}$/i.test(accountId) || !token || /\s/.test(token)) {
+    throw new Error('Cloudflare customer email is not configured');
+  }
+  let response;
+  try {
+    response = UrlFetchApp.fetch('https://api.cloudflare.com/client/v4/accounts/' + accountId + '/email/sending/send', {
+      method: 'post', contentType: 'application/json', muteHttpExceptions: true, followRedirects: false,
+      headers: { Authorization: 'Bearer ' + token },
+      payload: JSON.stringify({
+        to: recipient,
+        from: { address: 'noreply@mftnb.com', name: 'Moving Forward to New Beginnings' },
+        reply_to: 'noreply@mftnb.com',
+        subject: email.subject, text: email.body, html: email.htmlBody,
+        headers: { 'Auto-Submitted': 'auto-generated', 'X-Auto-Response-Suppress': 'All' }
+      })
+    });
+  } catch (err) {
+    // Provider errors can contain request data. Never log the request, token, or raw response.
+    throw new Error('Cloudflare customer email request failed');
+  }
+  const status = response.getResponseCode();
+  if (status < 200 || status >= 300) {
+    throw new Error('Cloudflare customer email HTTP ' + status);
+  }
+  let data;
+  try {
+    data = JSON.parse(response.getContentText());
+  } catch (err) {
+    throw new Error('Invalid Cloudflare customer email response');
+  }
+  const result = data && data.result;
+  function includesRecipient(list) {
+    return Array.isArray(list) && list.some(function(address) {
+      return typeof address === 'string' && address.toLowerCase() === recipient.toLowerCase();
+    });
+  }
+  if (!data || data.success !== true || !result ||
+      includesRecipient(result.permanent_bounces) || includesRecipient(result.suppressed_recipients) ||
+      (!includesRecipient(result.delivered) && !includesRecipient(result.queued))) {
+    throw new Error('Cloudflare did not accept the customer email recipient');
+  }
+  // Accepted or queued by the provider; inbox delivery is not guaranteed.
 }
 
 // Private owner inbox + standards-based Web Push. No customer data in push payloads.

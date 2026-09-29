@@ -6,7 +6,7 @@ The phone app lives at `https://mftnb.com/owner/` in this repository. It uses th
 
 Publishing this repository deploys the owner app assets through the existing Cloudflare Pages connection. It **does not update Google's running Apps Script**. Until that script is updated and enabled, the app explicitly says setup is pending and does not offer sign-in. Do not describe push delivery as live until the Google-side activation and a real phone test have succeeded.
 
-`apps_script.gs` is now a generated, single-file deployment bundle. Its sources are `backend/forms.gs`, `backend/owner-notifications.gs`, and `tools/push-crypto.mjs`. Run `npm ci && npm run build:push` after editing them. The original estimate and message handlers retain their existing email flow, including the customer receipt's 24-hour reply expectation. The old public health version remains available; `?action=owner-status` is the owner-feature activation check.
+`apps_script.gs` is a generated, single-file deployment bundle. Its sources are `backend/forms.gs`, `backend/customer-email.gs`, `backend/owner-notifications.gs`, and `tools/push-crypto.mjs`. Run `npm ci && npm run build:push` after editing them. Customer receipts retain their 24-hour response expectation; [Cloudflare sender configuration](ESTIMATE-EMAIL.md) can enable `noreply@mftnb.com`. Office mail and owner sign-in codes retain their existing MailApp path. The public health version identifies the backend release; `?action=owner-status` remains the owner-feature activation check. Before deploying, reconcile the live Sheet1 schema described in the email setup guide with both form writes and owner inbox readers.
 
 ## Activate the existing Google backend
 
