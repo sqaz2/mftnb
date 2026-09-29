@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#142645">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="MFTNB Leads">
+  <title>MFTNB Leads · Owner inbox</title>
+  <link rel="icon" href="/favicon-32.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/owner/manifest.webmanifest">
+  <link rel="stylesheet" href="/owner/owner.css">
+  <script src="/owner/config.js" defer></script>
+  <script src="/owner/owner.js" defer></script>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/owner/"><img src="/apple-touch-icon.png" alt="" width="44" height="44"><span>MFTNB <strong>Leads</strong><small>Moving Forward to New Beginnings</small></span></a><button id="logout" class="quiet" hidden>Sign out</button></header>
+  <main>
+    <section class="welcome"><p class="eyebrow">YOUR OWNER INBOX</p><h1>A new beginning.<br><span>One conversation away.</span></h1><p>New estimate requests and messages, ready when you are.</p></section>
+    <div id="notice" class="notice" role="status" aria-live="polite">Connecting to your inbox…</div>
+    <section id="install" class="card install" hidden><div class="step">1</div><div><h2>Keep MFTNB on your phone</h2><p id="installHelp"></p><button id="installButton" hidden>Add MFTNB to home screen</button></div></section>
+    <section id="login" class="card login" hidden>
+      <p class="eyebrow">PRIVATE ACCESS</p><h2>Welcome back, Chris.</h2><p>Sign in with the owner email saved for MFTNB.</p>
+      <form id="emailForm"><label for="email">Owner email</label><input id="email" type="email" inputmode="email" autocomplete="email" required placeholder="Your email address"><div id="securityCheck"></div><button id="sendCode" type="submit" disabled>Email my sign-in code</button></form>
+      <form id="codeForm" hidden><label for="code">8-digit sign-in code</label><input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{8}" maxlength="8" required placeholder="00000000"><button type="submit">Open my inbox</button><button type="button" id="changeEmail" class="quiet">Use another email or request a new code</button></form>
+      <p class="small">Your customer details are only shown after you sign in.</p>
+    </section>
+    <section id="dashboard" hidden>
+      <section class="card notifications"><div class="bell" aria-hidden="true">↗</div><div class="notificationCopy"><h2 id="pushHeading">Hear about the next lead</h2><p id="pushHelp">Enable phone notifications for new estimate requests and messages.</p><div class="buttonRow"><button id="enablePush">Enable notifications</button><button id="testPush" class="secondary" hidden>Send a test alert</button><button id="disablePush" class="quiet" hidden>Turn off</button></div></div></section>
+      <div class="inboxHeading"><div><p class="eyebrow">LET’S GET MOVING</p><h2>Your leads <span id="newCount" class="count">0 new</span></h2></div><button id="refresh" class="secondary">Refresh</button></div>
+      <div class="filters" role="group" aria-label="Filter leads"><button data-filter="new" aria-pressed="true">New</button><button data-filter="all" aria-pressed="false">All</button><button data-filter="contacted" aria-pressed="false">Contacted</button><button data-filter="booked" aria-pressed="false">Booked</button></div>
+      <p id="freshness" class="small"></p>
+      <div id="leadList" class="leadList"></div>
+      <div id="empty" class="card empty" hidden><div class="emptySymbol" aria-hidden="true">✓</div><h3>You’re up to date.</h3><p>New estimate requests and messages will appear here.</p></div>
+    </section>
+    <footer>Moving Forward to New Beginnings <span>Red Deer & Central Alberta</span><a href="/">Visit MFTNB</a></footer>
+  </main>
+  <dialog id="leadDialog"><div class="dialogTop"><span id="detailKind" class="eyebrow"></span><button id="closeDetail" class="quiet" aria-label="Close lead">Close ✕</button></div><h2 id="detailName"></h2><p id="detailTime" class="small"></p><div id="contactActions" class="buttonRow"></div><div id="detailFields"></div><label for="leadStatus">Lead status</label><select id="leadStatus"><option value="new">New</option><option value="contacted">Contacted</option><option value="booked">Booked</option><option value="closed">Closed</option></select><p id="detailNotice" role="status" class="small"></p></dialog>
+  <noscript><p class="notice">Enable JavaScript to use your MFTNB inbox.</p></noscript>
+</body>
+</html>

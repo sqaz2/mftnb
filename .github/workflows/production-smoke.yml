@@ -6,6 +6,8 @@ on:
       - 'index.html'
       - '*.js'
       - '*.css'
+      - 'owner/**'
+      - '_headers'
       - '.github/workflows/production-smoke.yml'
   workflow_dispatch:
 permissions:
@@ -38,7 +40,7 @@ jobs:
           version = version_match.group(1)
           expected = {
               name: hashlib.sha256(Path(name).read_bytes()).hexdigest()
-              for name in ('script.js', 'travel.js', 'maps-config.js', 'styles.css', 'estimator.css')
+              for name in ('script.js', 'travel.js', 'maps-config.js', 'styles.css', 'estimator.css', 'owner/index.html', 'owner/config.js', 'owner/owner.js', 'owner/owner.css', 'owner/sw.js', 'owner/manifest.webmanifest', 'owner/icon-192.png', 'owner/icon-512.png')
           }
           run_id = os.environ['GITHUB_RUN_ID']
           commit = os.environ['GITHUB_SHA']
@@ -89,6 +91,10 @@ jobs:
                       if digest != expected_digest:
                           raise RuntimeError(f'{name}: served bytes differ from release {commit}')
                       verified.append(f'{name}: SHA-256 {digest}')
+                  if 'mftnb.com' in final_url:
+                      _, _, owner_url = get('owner/', attempt)
+                      if not owner_url.split('?')[0].endswith('/owner/'):
+                          raise RuntimeError('Owner app URL unexpectedly redirected')
                   report = [
                       'PASS: https://mftnb.com serves the reviewed-estimate release.',
                       f'Release version: {version}',

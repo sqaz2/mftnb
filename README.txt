@@ -40,3 +40,9 @@ Address confirmation and Google Maps travel
 - See docs/MAPS-SETUP.md for the activation checklist and staff calculation contract.
 - maps-config.js deliberately starts without a browser key and with an unconfirmed shop pin. Manual address confirmation and staff review remain available.
 - Cloudflare Pages is the current GitHub-connected host; this feature uses the same repository and delivery endpoint.
+
+Owner phone notifications
+- Installable private owner app: https://mftnb.com/owner/.
+- See docs/OWNER-ALERTS.md for the separate Google Apps Script activation and real-phone delivery check.
+- The owner email stays in private Google settings. The public app shows setup pending until the backend is enabled.
+- apps_script.gs is generated: edit backend/*.gs, then run npm ci && npm run build:push.

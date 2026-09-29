@@ -1,0 +1,13 @@
+{
+  "name": "mftnb-owner-notifications",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build:push": "node tools/build-push.mjs",
+    "test": "node --test tests/*.test.cjs"
+  },
+  "devDependencies": {
+    "@noble/curves": "2.4.0",
+    "esbuild": "0.25.12"
+  }
+}

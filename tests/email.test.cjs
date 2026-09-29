@@ -25,8 +25,9 @@ function backend({ failTo = [], failWrite = false, verified = true } = {}) {
     getLastRow() { return rows.length; }
   };
   const context = vm.createContext({
+    LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
     PropertiesService: { getScriptProperties: () => ({ getProperty: () => 'test-secret' }) },
-    SpreadsheetApp: { getActiveSpreadsheet: () => ({ getSheetByName: () => sheet }) },
+    SpreadsheetApp: { flush() {}, getActiveSpreadsheet: () => ({ getSheetByName: () => sheet }) },
     MailApp: { sendEmail(email) {
       events.push('email:' + email.to);
       if (failTo.includes(email.to)) throw new Error('Mail unavailable');
