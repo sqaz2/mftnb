@@ -10,18 +10,22 @@ When enabled, Cloudflare sends customer confirmations from **noreply@mftnb.com**
 
 ## Current activation status
 
-Repository code is ready for configuration. A GitHub/Pages deployment does not activate email or update the running Google Apps Script. On September 29, 2026, the saved Cloudflare token could read `mftnb.com` but received HTTP 403 for DNS and Email Routing settings/rules. No DNS or email settings were changed. Sending entitlement and inbox delivery remain unverified.
+On September 29, 2026, the saved Cloudflare credential was verified and inbound routing was activated. Cloudflare reports `enabled: true, status: ready`. The exact `noreply@mftnb.com` rule routes to **mftnb-noreply**, whose two deployed module hashes match the reviewed source at `09a400be497cc09ccbd44afed95829122076ce57`. Worker and preview URLs are disabled. Cloudflare created three root MX records, one root SPF record and its routing DKIM record. Existing exact-address rules and the disabled catch-all were preserved.
+
+The scoped activation ran through the existing secret in an isolated administrative branch: [verified setup run](https://github.com/sqaz2/1v1-nz/actions/runs/36513703817). It did not export the credential, send email, change billing, or deploy the game project.
+
+**Outgoing customer confirmations are not activated yet.** Sending-domain MX/DKIM and DMARC records were absent after the routing setup, so `mftnb.com` still needs Email Sending onboarding. The live form endpoint still returned plain `ok`; the updated Apps Script bundle has not been deployed by this setup. Sending entitlement and actual inbox delivery remain unverified. A GitHub/Pages deployment does not update the running Google Apps Script.
 
 The live lead Sheet was also checked: actual submissions were in **Sheet1**, with 14 columns (`submittedAt, name, email, phone, pickup, dropoff, moveDate, timeWindow, homeSize, access, inventory, extras, notes, source`). The repository's `Leads` tab was empty, and the live `/exec` health response was plain `ok`. **Compare the active script before deployment.** Preserve the live Sheet1 mapping and private changes; do not silently move submissions to another tab or paste the repository's 16-column layout over Sheet1. If reconciling the full bundle, align owner inbox readers/reconciliation with the retained live schema too.
 
 ## Cloudflare setup
 
-1. Use the existing account and `mftnb.com` zone. The setup credential needs permission to manage DNS, Email Routing settings/rules and Workers scripts. Keep secrets in the existing secret store, never code, logs or chat. The application runtime needs only an Email Sending token, not broad DNS or Worker access.
+1. Use the existing account and `mftnb.com` zone. The setup credential needs DNS Edit, Zone Read, **Zone Settings Edit**, Email Routing Rules Edit, and Workers Scripts Edit. Keep secrets in the existing secret store, never code, logs or chat. The application runtime needs only an Email Sending token, not broad DNS or Worker access.
 2. Check Email Sending entitlement. Cloudflare currently requires Workers Paid to send to arbitrary customer addresses. Do not assume the account has it or enable a paid plan without owner approval.
 3. In **Compute → Email Service → Email Sending**, onboard `mftnb.com` and verify the provider-issued DNS records. Sending uses `cf-bounce` MX/SPF, `cf-bounce._domainkey` DKIM and `_dmarc`. Inspect existing DNS first and preserve other email services; do not create duplicate SPF/DMARC policies.
-4. Enable incoming Email Routing for `mftnb.com`, reviewing its required root MX/SPF and DKIM records and existing inbound rules before changing anything.
+4. Incoming Email Routing is already enabled for `mftnb.com`; inspect its existing state before any future change. For root-zone activation, the documented `POST /zones/{zone_id}/email/routing/dns` call has no request body. The optional `name` parameter is for a subdomain; passing the root name produces error 2007.
 5. Deploy `email-worker/worker.mjs` with `email-worker/wrangler.jsonc` to this account as **mftnb-noreply**. It has only an email handler, no public HTTP mail endpoint, no secrets and no database. Worker and preview URLs are disabled. Incoming `message.reply()` provides the reply path without a sending binding.
-6. Create an exact Email Routing rule: **noreply@mftnb.com → Send to a Worker: mftnb-noreply**. Do not use a catch-all or replace unrelated rules. Verify this route before enabling outgoing noreply confirmations.
+6. The exact Email Routing rule **noreply@mftnb.com → Send to a Worker: mftnb-noreply** is already installed. Preserve it and unrelated rules; do not add a duplicate or a catch-all. Verify actual reply delivery before enabling outgoing noreply confirmations.
 
 ## Activate the existing Google backend
 
