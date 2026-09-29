@@ -11,8 +11,23 @@ function ownerLocked_(work) {
     try { SpreadsheetApp.flush(); } finally { lock.releaseLock(); }
   }
 }
-function appendLeadRow_(sheet, row) {
-  return ownerLocked_(function() { sheet.appendRow(row); return sheet.getLastRow(); });
+function appendLeadRow_(sheet, row, columns) {
+  return ownerLocked_(function() {
+    if (columns) {
+      if (!sheet.getLastRow()) {
+        sheet.appendRow(columns);
+      } else {
+        const header = sheet.getRange(1, 1, 1, columns.length).getValues()[0];
+        // Only the two new trailing headers may be blank. Never write into an unknown layout.
+        if (columns.some(function(name, i) { return header[i] !== name && !(i >= 14 && !header[i]); })) {
+          throw new Error('The estimate sheet columns have changed. Staff setup is required before saving.');
+        }
+        if (!header[14] || !header[15]) sheet.getRange(1, 15, 1, 2).setValues([columns.slice(14)]);
+      }
+    }
+    sheet.appendRow(row);
+    return sheet.getLastRow();
+  });
 }
 function ownerEmail_() {
   // Deliberately never search customer rows or accept an address from the browser as an administrator.
@@ -207,7 +222,7 @@ function ownerSheet_() {
 function ownerLeadData_(kind, values) {
   function v(i, limit) { return String(values[i] == null ? '' : values[i]).slice(0, limit || 1024); }
   const data = { name: v(1), email: v(2), phone: v(3) };
-  if (kind === 'estimate') Object.assign(data, { pickup: v(4, 2048), dropoff: v(5, 2048), moveDate: v(6), timeWindow: v(7), homeType: v(8), bedrooms: v(9), access: v(10), inventory: v(11, 6000), extras: v(12), notes: v(13, 12000) });
+  if (kind === 'estimate') Object.assign(data, { pickup: v(4, 2048), dropoff: v(5, 2048), moveDate: v(6), timeWindow: v(7), homeType: v(8), bedrooms: v(14), access: v(9), inventory: v(10, 6000), extras: v(11), notes: v(12, 12000) });
   else data.message = v(4, 12000);
   return data;
 }
@@ -279,7 +294,7 @@ function processOwnerNotifications() {
       const key = OWNER_PREFIX + 'CURSOR_' + kind;
       let cursor = Number(SCRIPT_PROPERTIES.getProperty(key) || 0);
       const end = Math.min(sheet.getLastRow(), cursor + 40);
-      for (; cursor < end; cursor++) ownerRecord_(kind, cursor + 1, sheet.getRange(cursor + 1, 1, 1, kind === 'estimate' ? 16 : 6).getValues()[0]);
+      for (; cursor < end; cursor++) ownerRecord_(kind, cursor + 1, sheet.getRange(cursor + 1, 1, 1, kind === 'estimate' ? ESTIMATE_COLUMNS.length : 6).getValues()[0]);
       SCRIPT_PROPERTIES.setProperty(key, String(end));
     });
   });

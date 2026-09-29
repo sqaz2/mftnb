@@ -1,12 +1,14 @@
 // Google Apps Script backend for Moving Forward to New Beginnings
 // Handles chat-style estimate submissions and quick contact messages.
 
-const ESTIMATE_SHEET_NAME = 'Leads';
+const ESTIMATE_SHEET_NAME = 'Sheet1';
+// The live sheet's first 14 columns must retain their positions. New fields go at the end.
+const ESTIMATE_COLUMNS = ['submittedAt', 'name', 'email', 'phone', 'pickup', 'dropoff', 'moveDate', 'timeWindow', 'homeSize', 'access', 'inventory', 'extras', 'notes', 'source', 'bedrooms', 'consent'];
 const QUICK_SHEET_NAME = 'Quick Messages';
 const OFFICE_EMAIL = 'info@mftnb.ca';
 const CUSTOMER_SUBJECT = 'We received your message – Moving Forward to New Beginnings';
 const ESTIMATE_CUSTOMER_SUBJECT = 'We received your estimate request – Moving Forward to New Beginnings';
-const BACKEND_VERSION = '2026-09-29-cloudflare-email';
+const BACKEND_VERSION = '2026-09-29-cloudflare-email-sheet1';
 const SCRIPT_PROPERTIES = PropertiesService.getScriptProperties();
 const TURNSTILE_SECRET_PROPERTY = 'TURNSTILE_SECRET';
 // Optional: populate TURNSTILE_SECRET_FALLBACK for temporary testing only. Prefer Script Properties.
@@ -111,15 +113,15 @@ function handleEstimateSubmission(body) {
     body.moveDate || '',
     body.timeWindow || '',
     body.homeType || body.homeSize || '',
-    body.bedrooms || '',
     body.access || '',
     body.inventory || '',
     extras,
     body.notes || '',
     body.source || '',
+    body.bedrooms || '',
     body.consent === true ? 'Yes' : 'No'
   ];
-  const rowNumber = appendLeadRow_(sheet, row);
+  const rowNumber = appendLeadRow_(sheet, row, ESTIMATE_COLUMNS);
   recordOwnerLeadSafely_('estimate', rowNumber, row);
 
   const officeHtml = buildEstimateHtml(body, timestamp, rowNumber);
