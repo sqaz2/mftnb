@@ -13,6 +13,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: npm ci
+      - run: npm run build:push && git diff --exit-code apps_script.gs backend/THIRD-PARTY-LICENSES.txt
+      - run: node --check owner/owner.js && node --check owner/sw.js
       - run: node --check maps-config.js && node --check travel.js && node --check script.js
       - run: node --test tests/*.test.cjs
   browser-tests:
@@ -27,3 +30,20 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - run: python tests/browser_smoke.py
       - run: python tests/browser_travel.py
+  owner-browser-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright@1.63.0
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/owner.browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owner-app-browser-previews
+          path: /tmp/mftnb-owner-*.png
+          if-no-files-found: ignore

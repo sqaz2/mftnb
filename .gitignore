@@ -1,0 +1,7 @@
+node_modules/
+.dev.vars
+.env
+.clasp.json
+.clasprc.json
+__pycache__/
+test-results/
