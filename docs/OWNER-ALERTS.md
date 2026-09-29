@@ -37,7 +37,7 @@ Google Drive access and Apps Script deployment permissions are different capabil
 
 - `npm test` covers original estimate behavior, receipts, authentication limits, session revocation, endpoint validation, independently verified VAPID signatures, queue reconciliation/retry, and failures after saving.
 - `node tests/owner.browser.cjs` covers owner login, mobile/desktop rendering, safe customer-text display, call links, status edits, phone controls, iPhone installation guidance, and the setup-pending state. It uses Playwright, with external endpoints mocked. Set `CODEX_PRIMARY_RUNTIME_NODE_MODULES` to the runtime modules, or install Playwright locally for CI.
-- Production smoke checks fetch only public assets and owner feature status. They do not send email, push or customer leads.
+- Production smoke checks fetch public assets and verify the owner page content and headers. They do not send email, push or customer leads.
 - To stop alerts, run `disableOwnerNotifications` in Apps Script. It revokes sessions/devices and removes only this feature's trigger. It preserves source leads and the owner inbox. For a full rollback, stop the trigger and select the preceding version of the same web-app deployment, then revert the website commit if necessary.
 
 References: [Web Push on iPhone](https://webkit.org/blog/13878/web-push-for-web-apps-on-ios-and-ipados/), [VAPID (RFC 8292)](https://www.rfc-editor.org/rfc/rfc8292), [HTTP Web Push (RFC 8030)](https://www.rfc-editor.org/rfc/rfc8030), [Google installable triggers](https://developers.google.com/apps-script/guides/triggers/installable), [Google web-app deployments](https://developers.google.com/apps-script/concepts/deployments).

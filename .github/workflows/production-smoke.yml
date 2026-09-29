@@ -40,7 +40,7 @@ jobs:
           version = version_match.group(1)
           expected = {
               name: hashlib.sha256(Path(name).read_bytes()).hexdigest()
-              for name in ('script.js', 'travel.js', 'maps-config.js', 'styles.css', 'estimator.css', 'owner/index.html', 'owner/config.js', 'owner/owner.js', 'owner/owner.css', 'owner/sw.js', 'owner/manifest.webmanifest', 'owner/icon-192.png', 'owner/icon-512.png')
+              for name in ('script.js', 'travel.js', 'maps-config.js', 'styles.css', 'estimator.css', 'owner/config.js', 'owner/owner.js', 'owner/owner.css', 'owner/sw.js', 'owner/manifest.webmanifest', 'owner/icon-192.png', 'owner/icon-512.png')
           }
           run_id = os.environ['GITHUB_RUN_ID']
           commit = os.environ['GITHUB_SHA']
@@ -70,11 +70,11 @@ jobs:
                   body = response.read(2_000_001)
                   if len(body) > 2_000_000:
                       raise RuntimeError(f'{path or "/"}: unexpected response size')
-                  return body, response.headers.get('Content-Type', ''), response.geturl()
+                  return body, response.headers.get('Content-Type', ''), response.geturl(), response.headers
 
           for attempt in range(1, 19):
               try:
-                  body, content_type, final_url = get('', attempt)
+                  body, content_type, final_url, _ = get('', attempt)
                   if 'text/html' not in content_type:
                       raise RuntimeError(f'Homepage has unexpected content type: {content_type}')
                   html = body.decode('utf-8')
@@ -86,15 +86,26 @@ jobs:
                   verified = []
                   for name, expected_digest in expected.items():
                       path = f'{name}?v={version}' if name == 'script.js' else name
-                      payload, mime, asset_url = get(path, attempt)
+                      payload, mime, asset_url, _ = get(path, attempt)
                       digest = hashlib.sha256(payload).hexdigest()
                       if digest != expected_digest:
                           raise RuntimeError(f'{name}: served bytes differ from release {commit}')
                       verified.append(f'{name}: SHA-256 {digest}')
-                  if 'mftnb.com' in final_url:
-                      _, _, owner_url = get('owner/', attempt)
-                      if not owner_url.split('?')[0].endswith('/owner/'):
-                          raise RuntimeError('Owner app URL unexpectedly redirected')
+                  owner_body, owner_mime, owner_url, owner_headers = get('owner/', attempt)
+                  owner_html = owner_body.decode('utf-8')
+                  owner_markers = ('<title>MFTNB Leads', 'id="welcome"', 'id="emailForm"', 'id="dashboard"',
+                                   'id="leadDialog"', '/owner/owner.js', '/owner/config.js', '/owner/manifest.webmanifest')
+                  missing_owner = [text for text in owner_markers if text not in owner_html]
+                  if 'text/html' not in owner_mime or missing_owner:
+                      title = re.search(r'<title>(.*?)</title>', owner_html, re.S)
+                      raise RuntimeError(f'Owner page content mismatch: {missing_owner}; title={title.group(1) if title else "missing"}; url={owner_url}')
+                  if not owner_url.split('?')[0].endswith('/owner/'):
+                      raise RuntimeError('Owner app URL unexpectedly redirected')
+                  if 'no-store' not in owner_headers.get('Cache-Control', ''):
+                      raise RuntimeError('Owner page is missing no-store cache policy')
+                  if "frame-ancestors 'none'" not in owner_headers.get('Content-Security-Policy', ''):
+                      raise RuntimeError('Owner page is missing its restrictive security policy')
+                  verified.append('Owner HTML: expected app content, script links, private-page cache policy and CSP verified. HTML may be rewritten by the host; executable assets are checked byte-for-byte.')
                   report = [
                       'PASS: https://mftnb.com serves the reviewed-estimate release.',
                       f'Release version: {version}',
