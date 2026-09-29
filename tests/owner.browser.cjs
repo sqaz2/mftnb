@@ -58,6 +58,7 @@ const server=http.createServer((req,res)=>{
   await login.p.locator('#email').fill('owner@example.test');await login.p.locator('#sendCode').click();await login.p.locator('#code').fill('12345678');await login.p.locator('#codeForm button[type=submit]').click();await login.p.locator('#dashboard').waitFor({state:'visible'});
   assert.equal(login.calls.find(x=>x.action==='owner.verify').newToken.length,43);
   assert.equal(await login.p.locator('.lead').count(),2);
+  assert.equal(await login.p.locator('#welcome').isVisible(),false);
   await login.p.locator('#enablePush').click();await login.p.waitForFunction(()=>document.querySelector('#pushHeading').textContent==='Phone alerts are on');
   assert.ok(login.calls.some(x=>x.action==='owner.subscribe'));
   await login.p.locator('#testPush').click();await login.p.waitForFunction(()=>document.querySelector('#notice').textContent.includes('Test accepted'));

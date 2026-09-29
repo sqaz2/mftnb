@@ -60,6 +60,7 @@
   function showLogin(expired = false) {
     token = ''; try { localStorage.removeItem(sessionKey); } catch (_) {}
     leads = []; $('leadList').replaceChildren(); if ($('leadDialog').open) $('leadDialog').close();
+    $('welcome').hidden = false;
     $('dashboard').hidden = true; $('logout').hidden = true; $('login').hidden = false;
     $('emailForm').hidden = false; $('codeForm').hidden = true;
     setupSecurity();
@@ -141,6 +142,7 @@
     try {
       const result = await api('inbox'); leads = result.leads; publicKey = result.publicKey; deviceEnabled = result.notificationsEnabled;
       if (deviceEnabled && registration && 'PushManager' in window && !(await registration.pushManager.getSubscription())) deviceEnabled = false;
+      $('welcome').hidden = true;
       $('login').hidden = true; $('dashboard').hidden = false; $('logout').hidden = false; render(); updatePush();
       $('freshness').textContent = 'Updated ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + ' · Latest 200 leads';
       if (deviceEnabled && (!result.lastDeliveryRun || Date.now() - result.lastDeliveryRun > 600000)) notice('The alert service needs attention. Check this inbox and your office email for new leads.', true);
