@@ -5,6 +5,8 @@ const ESTIMATE_SHEET_NAME = 'Leads';
 const QUICK_SHEET_NAME = 'Quick Messages';
 const OFFICE_EMAIL = 'info@mftnb.ca';
 const CUSTOMER_SUBJECT = 'We received your message – Moving Forward to New Beginnings';
+const ESTIMATE_CUSTOMER_SUBJECT = 'We received your estimate request – Moving Forward to New Beginnings';
+const BACKEND_VERSION = '2026-09-29-estimate-receipt';
 const SCRIPT_PROPERTIES = PropertiesService.getScriptProperties();
 const TURNSTILE_SECRET_PROPERTY = 'TURNSTILE_SECRET';
 // Optional: populate TURNSTILE_SECRET_FALLBACK for temporary testing only. Prefer Script Properties.
@@ -32,7 +34,7 @@ function doOptions() {
 }
 
 function doGet() {
-  return respond({ ok: true, service: 'mftnb-apps-script' });
+  return respond({ ok: true, service: 'mftnb-apps-script', version: BACKEND_VERSION });
 }
 
 function doPost(e) {
@@ -66,7 +68,7 @@ function doPost(e) {
 
     if (formType === 'estimate') {
       const record = handleEstimateSubmission(body);
-      return respond({ ok: true, row: record.rowNumber });
+      return respond({ ok: true, row: record.rowNumber, confirmationEmailSent: record.confirmationEmailSent });
     }
 
     if (formType === 'quick-message') {
@@ -132,21 +134,25 @@ function handleEstimateSubmission(body) {
     console.error('Unable to email office copy', err);
   }
 
+  let confirmationEmailSent = false;
   if (body.email) {
-    const customerHtml = buildCustomerEstimateHtml(body, timestamp);
     try {
       MailApp.sendEmail({
         to: body.email,
-        subject: 'Thanks for reaching out to Moving Forward to New Beginnings',
-        htmlBody: customerHtml,
+        subject: ESTIMATE_CUSTOMER_SUBJECT,
+        body: buildCustomerEstimateText(body, timestamp),
+        htmlBody: buildCustomerEstimateHtml(body, timestamp),
+        name: 'Moving Forward to New Beginnings',
         replyTo: OFFICE_EMAIL
       });
+      // MailApp accepted the send; this does not guarantee delivery to the inbox.
+      confirmationEmailSent = true;
     } catch (err) {
       console.error('Unable to send customer confirmation', err);
     }
   }
 
-  return { rowNumber: rowNumber };
+  return { rowNumber: rowNumber, confirmationEmailSent: confirmationEmailSent };
 }
 
 function handleQuickMessageSubmission(body) {
@@ -302,7 +308,7 @@ function buildEstimateHtml(body, timestamp, rowNumber) {
   return lines.join('\n');
 }
 
-function buildCustomerEstimateHtml(body, timestamp) {
+function customerEstimateSummary(body) {
   const extras = Array.isArray(body.extras) && body.extras.length ? body.extras.join(', ') : 'None';
   const summaryParts = [];
   if (body.homeType || body.homeSize) {
@@ -314,22 +320,53 @@ function buildCustomerEstimateHtml(body, timestamp) {
   const homeSummary = summaryParts.filter(function(part) {
     return part;
   }).join(' · ') || 'Details pending';
+  return [
+    ['Move date', body.moveDate || 'Flexible'],
+    ['From', body.pickup],
+    ['To', body.dropoff],
+    ['Home type & rooms', homeSummary],
+    ['Access details', body.access || 'Details pending'],
+    ['Special items', body.inventory || 'None noted'],
+    ['Extra services', extras],
+    ['Additional notes', body.notes || 'None']
+  ];
+}
+
+function buildCustomerEstimateHtml(body, timestamp) {
   const lines = [];
   lines.push('<p>Hi ' + sanitize(body.name) + ',</p>');
-  lines.push('<p>Thank you for reaching out to Moving Forward to New Beginnings. We received your moving details on <strong>' + timestamp.toLocaleString() + '</strong> and will follow up shortly with next steps.</p>');
+  lines.push('<p>Thank you for contacting Moving Forward to New Beginnings. We received your estimate request on <strong>' + sanitize(timestamp.toLocaleString()) + '</strong>.</p>');
+  lines.push('<p>You can expect to hear back from our team <strong>within 24 hours</strong>.</p>');
+  lines.push('<p>If you have any questions, call Chris at <a href="tel:+15877310695">(587) 731-0695</a>. You can also reply to this email if your details change.</p>');
+  lines.push('<p>This email confirms we received your estimate request. Your moving details are awaiting staff review; no price or booking is confirmed yet.</p>');
   lines.push('<h3>Your summary</h3>');
   lines.push('<ul>');
-  lines.push('  <li><strong>Move date:</strong> ' + sanitize(body.moveDate || 'Flexible') + '</li>');
-  lines.push('  <li><strong>From:</strong> ' + sanitize(body.pickup) + '</li>');
-  lines.push('  <li><strong>To:</strong> ' + sanitize(body.dropoff) + '</li>');
-  lines.push('  <li><strong>Home type &amp; rooms:</strong> ' + sanitize(homeSummary) + '</li>');
-  lines.push('  <li><strong>Access details:</strong> ' + sanitize(body.access || 'Provided verbally') + '</li>');
-  lines.push('  <li><strong>Special items:</strong> ' + sanitize(body.inventory || 'None noted') + '</li>');
-  lines.push('  <li><strong>Extra services:</strong> ' + sanitize(extras) + '</li>');
-  lines.push('  <li><strong>Additional notes:</strong> ' + sanitize(body.notes || 'None') + '</li>');
+  customerEstimateSummary(body).forEach(function(detail) {
+    lines.push('  <li><strong>' + sanitize(detail[0]) + ':</strong> ' + sanitize(detail[1]).replace(/\r?\n/g, '<br />') + '</li>');
+  });
   lines.push('</ul>');
-  lines.push('<p>If anything changes, reply to this email or call/text <a href="tel:+15877310695">(587) 731-0695</a>.</p>');
   lines.push('<p>With gratitude,<br />Chris Ehret &amp; the MFTNB team</p>');
+  return lines.join('\n');
+}
+
+function buildCustomerEstimateText(body, timestamp) {
+  const lines = [
+    'Hi ' + body.name + ',',
+    '',
+    'Thank you for contacting Moving Forward to New Beginnings. We received your estimate request on ' + timestamp.toLocaleString() + '.',
+    '',
+    'You can expect to hear back from our team within 24 hours.',
+    '',
+    'If you have any questions, call Chris at (587) 731-0695. You can also reply to this email if your details change.',
+    '',
+    'This email confirms we received your estimate request. Your moving details are awaiting staff review; no price or booking is confirmed yet.',
+    '',
+    'Your summary'
+  ];
+  customerEstimateSummary(body).forEach(function(detail) {
+    lines.push(detail[0] + ': ' + detail[1]);
+  });
+  lines.push('', 'With gratitude,', 'Chris Ehret & the MFTNB team');
   return lines.join('\n');
 }
 

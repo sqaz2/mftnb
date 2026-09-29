@@ -19,7 +19,12 @@ Set up the backend (Google Apps Script → Google Sheets)
 3) File → Save. In Project Settings → Script properties, add `TURNSTILE_SECRET` with your Cloudflare secret key. (Never store the secret in source control.)
 4) Deploy → New deployment → Web app → Execute as: Me; Access: Anyone (or Anyone with the link). Copy URL.
 5) Open script.js and set `APPS_SCRIPT_URL` to that URL. Save and redeploy your site.
-6) Submit a test; a new row appears in the sheet and an email is sent (optional).
+6) Use a controlled test submission to verify the Sheet row, office notification, and customer receipt. See docs/ESTIMATE-EMAIL.md for updating the existing deployment and checking email delivery.
+
+Estimate receipt emails
+- The existing Apps Script sends a customer receipt after saving the estimate request to the Leads sheet.
+- The receipt says the request was received, a reply is expected within 24 hours, and questions can go to Chris at (587) 731-0695. Replies go to info@mftnb.ca.
+- Updating GitHub or Cloudflare does not deploy apps_script.gs. Update the existing Apps Script web app version using docs/ESTIMATE-EMAIL.md.
 
 Cloudflare Turnstile configuration
 - Frontend: The estimator and quick message forms render Turnstile explicitly. Update `TURNSTILE_SITE_KEY` in `script.js` with your site key from the Cloudflare dashboard.

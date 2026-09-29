@@ -1,7 +1,7 @@
 'use strict';
 
 // Public estimate requests are not calibrated price estimates. See docs/ESTIMATOR-AUDIT.md.
-const ESTIMATOR_VERSION = '2026-09-28-confirmed-travel';
+const ESTIMATOR_VERSION = '2026-09-29-estimate-receipt';
 const Travel = typeof module !== 'undefined' && module.exports ? require('./travel.js') : window.MFTNBTravel;
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2kTp_RynPKZptrLJrsv_DvS_-el2bzBz8Jc_QaEej2nHop5iABnMcuEa5pff2No9W8g/exec';
 const TURNSTILE_SITE_KEY = '0x4AAAAAAB2kYqJ0EOGNbli7';
@@ -409,9 +409,10 @@ function initializePage() {
     pending = true; availability(); $('sendEstimate').textContent = 'Sending…'; $('sendEstimate').setAttribute('aria-busy', 'true');
     status('estimateStatus', 'Sending your estimate request…');
     try {
-      await send(buildEstimatePayload(state, widgets.estimate.token, true));
+      const receipt = await send(buildEstimatePayload(state, widgets.estimate.token, true));
       routeRevision++; clearTimeout(routeExpiry); state = {}; editingId = null; save(); $('consent').checked = false;
-      status('estimateStatus', 'Your request was received. The team will review it; no price or booking is confirmed yet.', 'success');
+      const emailNotice = receipt.confirmationEmailSent === true ? ' A confirmation email has been sent.' : receipt.confirmationEmailSent === false ? ' We could not send your confirmation email, but you do not need to submit again.' : '';
+      status('estimateStatus', 'Your estimate request was received.' + emailNotice + ' You can expect to hear back within 24 hours. If you have any questions, call Chris at (587) 731-0695. Your details await staff review; no price or booking is confirmed yet.', 'success');
     } catch (err) { status('estimateStatus', `${err.message || 'Receipt could not be confirmed.'} Call (587) 731-0695 for help.`, 'error'); }
     finally { pending = false; resetWidget('estimate'); $('sendEstimate').textContent = 'Send to MFTNB'; $('sendEstimate').removeAttribute('aria-busy'); render(); }
   });
