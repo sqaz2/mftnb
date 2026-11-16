@@ -52,7 +52,12 @@ jobs:
               'This website has moved on to new beginnings.',
               '<strong>Susanna</strong>',
               'William Crowell, website creator',
-              'This is the business inbox.',
+              '(403) 872-7573',
+              'href="tel:+14038727573"',
+              'href="sms:+14038727573"',
+              'class="site-header"',
+              'class="hero-card"',
+              '/styles.css?v=2026-11-16-original-design',
           )
           last_error = ''
 
@@ -83,6 +88,8 @@ jobs:
                   missing = [text for text in required_html if text not in html]
                   if missing:
                       raise RuntimeError(f'Homepage does not yet contain release markers: {missing}')
+                  if re.search(r'mailto:|facebook\.com|587.?731.?0695|__SUSANNA_PHONE', html, re.I):
+                      raise RuntimeError('Homepage still contains previous contacts or an unfilled phone placeholder')
                   if re.search(r'<(?:form|input|textarea|iframe)\b|script\.js\?', html, re.I):
                       raise RuntimeError('Retired homepage still has an active form or script')
                   if 'no-store' not in home_headers.get('Cache-Control', ''):

@@ -118,6 +118,6 @@ test('rounding charges only the configured increment',()=>assert.equal(E.priceRe
 for (const change of [{approvedBy:''},{evidenceRef:''},{rateBasis:'unknown'},{crewSize:0},{crewSize:2.5},{crewHours:0},{hourlyRate:-1},{taxRate:2},{callOutFee:undefined},{billingIncrementMinutes:0},{hourlyRate:1e99}]) test(`reviewed pricing fails closed: ${JSON.stringify(change)}`,()=>assert.throws(()=>E.priceReviewedPlan({...reviewed,...change})));
 test('retired homepage provides a contact route without requiring JavaScript',()=>{
   const html=fs.readFileSync(require('node:path').join(__dirname,'../index.html'),'utf8');
-  assert.match(html, /href="mailto:info@mftnb\.ca/);
+  assert.match(html, /href="tel:\+14038727573"/);
   assert.doesNotMatch(html, /<script\b|Projected cost|Instant email confirmation/i);
 });

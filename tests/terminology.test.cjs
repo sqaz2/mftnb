@@ -16,14 +16,19 @@ test('retired public pages cannot collect or submit moving enquiries', () => {
     const html = read(name);
     assert.doesNotMatch(html, /<(?:form|input|textarea|script|iframe)\b/i);
     assert.match(html, /Website retired/);
-    assert.match(html, /mailto:info@mftnb\.ca/);
+    assert.match(html, /href="tel:\+14038727573"/);
+    assert.match(html, /href="sms:\+14038727573"/);
+    assert.doesNotMatch(html, /mailto:|facebook\.com|587.?731.?0695|__SUSANNA_PHONE/);
   }
 });
-test('retirement notice identifies a personal recommendation and the business contact', () => {
+test('retirement notice identifies a personal recommendation and Susanna contact', () => {
   const html = read('index.html');
   assert.match(html, /Susanna/);
   assert.match(html, /William Crowell, website creator/);
-  assert.match(html, /This is the business inbox/);
+  assert.match(html, /\(403\) 872-7573/);
+  assert.match(html, /\/styles\.css\?v=/);
+  assert.match(html, /class="site-header"/);
+  assert.match(html, /class="hero-card"/);
 });
 test('downloaded plan and submission notes use estimate terminology', () => {
   const state = {moveType:'same-property', fromAddress:'123 Test Street, Red Deer', onSiteDetails:'Basement to garage'};

@@ -1,6 +1,6 @@
 MFTNB — Website retired (16 November 2026)
 
-The public homepage and moving-checklist page now show William Crowell's retirement notice and personal recommendation to ask for Susanna. Public estimate and message forms are no longer served. Contact links use the existing business inbox and Facebook page; neither is labelled as Susanna's personal contact.
+The public homepage and moving-checklist page show William Crowell's retirement notice and personal recommendation to contact Susanna. The original logo, navy header, gradient hero, card styling, responsive stylesheet and footer are retained. Public estimate and message forms are no longer served. Susanna's phone number, (403) 872-7573, was supplied by William for publication on November 16, 2026. Call and text links use +14038727573; previous email and Facebook contact links are removed from the public pages.
 
 The previous privacy policy remains available for earlier submissions. Existing owner access, backend code, stored records, email routing, domain registrations and transfer settings are unchanged. This change does not claim the moving company is closed.
 
