@@ -11,13 +11,19 @@ for (const name of ['index.html', 'script.js', 'privacy.html', 'apps_script.gs',
     assert.doesNotMatch(read(name), disallowed);
   });
 }
-test('homepage consistently requests a reviewed estimate without promising a booking', () => {
+test('retired public pages cannot collect or submit moving enquiries', () => {
+  for (const name of ['index.html', 'blog/moving-checklist-before-moving-day/index.html', '404.html']) {
+    const html = read(name);
+    assert.doesNotMatch(html, /<(?:form|input|textarea|script|iframe)\b/i);
+    assert.match(html, /Website retired/);
+    assert.match(html, /mailto:info@mftnb\.ca/);
+  }
+});
+test('retirement notice identifies a personal recommendation and the business contact', () => {
   const html = read('index.html');
-  assert.ok(html.includes('Plan your move. Get a reviewed estimate.'));
-  assert.ok(html.includes('Start your estimate request'));
-  assert.ok(html.includes('This is an estimate request, not a confirmed price or booking.'));
-  assert.ok(html.includes('Estimate after review'));
-  assert.doesNotMatch(html, /\ba estimate\b/i);
+  assert.match(html, /Susanna/);
+  assert.match(html, /William Crowell, website creator/);
+  assert.match(html, /This is the business inbox/);
 });
 test('downloaded plan and submission notes use estimate terminology', () => {
   const state = {moveType:'same-property', fromAddress:'123 Test Street, Red Deer', onSiteDetails:'Basement to garage'};
@@ -32,11 +38,8 @@ test('downloaded plan and submission notes use estimate terminology', () => {
   assert.equal(payload.estimatedHours, null);
   assert.equal(payload.crewSize, null);
 });
-test('new release invalidates script cache but keeps existing draft storage', () => {
-  const html = read('index.html');
+test('retirement avoids cached forms and preserves historical draft storage', () => {
   const script = read('script.js');
-  const version = script.match(/const ESTIMATOR_VERSION = '([^']+)'/)[1];
-  assert.notEqual(version, '2026-09-11-review-first');
-  assert.ok(html.includes(`script.js?v=${version}`));
+  assert.match(read('_headers'), /^\/\*\n  Cache-Control: no-store/m);
   assert.ok(script.includes("const STORAGE_KEY = 'mftnb-estimate-v4'"));
 });

@@ -1,4 +1,12 @@
-MFTNB — Production Site
+MFTNB — Website retired (16 November 2026)
+
+The public homepage and moving-checklist page now show William Crowell's retirement notice and personal recommendation to ask for Susanna. Public estimate and message forms are no longer served. Contact links use the existing business inbox and Facebook page; neither is labelled as Susanna's personal contact.
+
+The previous privacy policy remains available for earlier submissions. Existing owner access, backend code, stored records, email routing, domain registrations and transfer settings are unchanged. This change does not claim the moving company is closed.
+
+The previous website source is retained in Git history at ae4a7d472612663d6dd87a8059c2c0ae5bc53431. The instructions below describe that historical implementation. Restoring forms requires a separate decision and verification of backend delivery.
+
+Historical production-site documentation
 
 This is a ready-to-host static website for Moving Forward to New Beginnings with a chat-style estimator and a backend that stores submissions to Google Sheets (no server secrets in the browser).
 

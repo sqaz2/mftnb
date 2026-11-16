@@ -116,7 +116,8 @@ test('approved transport, minimum, increments, fees and tax itemize in cents',()
 test('rounding does not add an increment to an exact boundary',()=>assert.equal(E.priceReviewedPlan({...reviewed,crewHours:2.25}).billedCrewHours,2.25));
 test('rounding charges only the configured increment',()=>assert.equal(E.priceReviewedPlan({...reviewed,crewHours:2.26}).billedCrewHours,2.5));
 for (const change of [{approvedBy:''},{evidenceRef:''},{rateBasis:'unknown'},{crewSize:0},{crewSize:2.5},{crewHours:0},{hourlyRate:-1},{taxRate:2},{callOutFee:undefined},{billingIncrementMinutes:0},{hourlyRate:1e99}]) test(`reviewed pricing fails closed: ${JSON.stringify(change)}`,()=>assert.throws(()=>E.priceReviewedPlan({...reviewed,...change})));
-test('static homepage makes no instant numeric promise and includes no-JS fallback',()=>{
+test('retired homepage provides a contact route without requiring JavaScript',()=>{
   const html=fs.readFileSync(require('node:path').join(__dirname,'../index.html'),'utf8');
-  assert.ok(html.includes('Estimate after review')); assert.ok(html.includes('<noscript>')); assert.ok(!html.includes('Projected cost')); assert.ok(!html.includes('Instant email confirmation'));
+  assert.match(html, /href="mailto:info@mftnb\.ca/);
+  assert.doesNotMatch(html, /<script\b|Projected cost|Instant email confirmation/i);
 });

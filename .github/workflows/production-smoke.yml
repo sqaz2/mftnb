@@ -4,6 +4,9 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - '404.html'
+      - 'privacy.html'
+      - 'blog/**'
       - '*.js'
       - '*.css'
       - 'owner/**'
@@ -45,14 +48,11 @@ jobs:
           run_id = os.environ['GITHUB_RUN_ID']
           commit = os.environ['GITHUB_SHA']
           required_html = (
-              'Plan your move. Get a reviewed estimate.',
-              'Estimate after review',
-              'Confirmed after review',
-              f'script.js?v={version}',
-              'estimator.css',
-              'travel.js',
-              'maps-config.js',
-              'travelSummary',
+              'Website retired',
+              'This website has moved on to new beginnings.',
+              '<strong>Susanna</strong>',
+              'William Crowell, website creator',
+              'This is the business inbox.',
           )
           last_error = ''
 
@@ -74,7 +74,7 @@ jobs:
 
           for attempt in range(1, 19):
               try:
-                  body, content_type, final_url, _ = get('', attempt)
+                  body, content_type, final_url, home_headers = get('', attempt)
                   if 'text/html' not in content_type:
                       raise RuntimeError(f'Homepage has unexpected content type: {content_type}')
                   html = body.decode('utf-8')
@@ -83,6 +83,22 @@ jobs:
                   missing = [text for text in required_html if text not in html]
                   if missing:
                       raise RuntimeError(f'Homepage does not yet contain release markers: {missing}')
+                  if re.search(r'<(?:form|input|textarea|iframe)\b|script\.js\?', html, re.I):
+                      raise RuntimeError('Retired homepage still has an active form or script')
+                  if 'no-store' not in home_headers.get('Cache-Control', ''):
+                      raise RuntimeError('Retirement notice is missing no-store')
+                  if 'noindex' not in home_headers.get('X-Robots-Tag', ''):
+                      raise RuntimeError('Retirement notice is missing noindex')
+                  for retired_path in ('blog/moving-checklist-before-moving-day/', '404.html'):
+                      retired_body, retired_mime, _, _ = get(retired_path, attempt)
+                      retired_html = retired_body.decode('utf-8')
+                      if 'text/html' not in retired_mime or any(marker not in retired_html for marker in required_html):
+                          raise RuntimeError(f'{retired_path}: retirement notice missing')
+                      if re.search(r'<(?:form|input|textarea|iframe)\b|script\.js\?', retired_html, re.I):
+                          raise RuntimeError(f'{retired_path}: old public form or script remains')
+                  privacy_body, _, _, _ = get('privacy.html', attempt)
+                  if 'The public estimate and message forms are no longer available.' not in privacy_body.decode('utf-8'):
+                      raise RuntimeError('Previous privacy policy has not been marked as historical')
                   verified = []
                   for name, expected_digest in expected.items():
                       path = f'{name}?v={version}' if name == 'script.js' else name
@@ -107,10 +123,9 @@ jobs:
                       raise RuntimeError('Owner page is missing its restrictive security policy')
                   verified.append('Owner HTML: expected app content, script links, private-page cache policy and CSP verified. HTML may be rewritten by the host; executable assets are checked byte-for-byte.')
                   report = [
-                      'PASS: https://mftnb.com serves the reviewed-estimate release.',
-                      f'Release version: {version}',
+                      'PASS: https://mftnb.com serves the website retirement notice.',
                       f'Repository commit checked: {commit}',
-                      'Homepage: HTTP 200; all release markers present.',
+                      'Homepage and previous blog: retirement notice present; no active forms or scripts. Historical privacy policy retained.',
                       *verified,
                       'Only public GET requests were made. No forms, customer leads, email or Sheets submissions were sent.',
                       'This check verifies deployed files, not production submission delivery or visual layout.',
